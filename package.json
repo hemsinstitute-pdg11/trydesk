@@ -1,0 +1,211 @@
+{
+  "name": "trydesk",
+  "version": "1.4.1",
+  "description": "Free, open-source remote desktop (WebRTC P2P) for Windows, controllable from Windows, macOS, Linux and Android",
+  "author": "DrWeabo (TryDesk)",
+  "license": "AGPL-3.0-only",
+  "homepage": "https://trydesk.ai.id",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TryDesk/TryDesk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/TryDesk/TryDesk/issues",
+    "email": "support@trydesk.ai.id"
+  },
+  "main": "src/main.js",
+  "desktopName": "trydesk.desktop",
+  "scripts": {
+    "start": "electron .",
+    "server": "node server/signaling-server.js",
+    "dev": "concurrently \"npm run server\" \"electron .\"",
+    "build": "electron-builder --win --x64",
+    "build:portable": "electron-builder --win portable --x64",
+    "build:installer": "electron-builder --win nsis --x64",
+    "build:linux": "electron-builder --linux AppImage deb --x64 --publish never",
+    "build:mac": "electron-builder --mac zip --arm64 --x64 --publish never",
+    "prebuild": "node scripts/patch-portable.mjs",
+    "prebuild:portable": "node scripts/patch-portable.mjs"
+  },
+  "dependencies": {
+    "discord-rpc": "^4.0.1",
+    "koffi": "^2.9.0"
+  },
+  "devDependencies": {
+    "@electron/fuses": "^1.8.0",
+    "concurrently": "^8.2.2",
+    "electron": "^45.2.1",
+    "electron-builder": "^26.18.0",
+    "ws": "^8.22.0"
+  },
+  "build": {
+    "appId": "com.trydesk.app",
+    "productName": "TryDesk",
+    "copyright": "Copyright © 2026 DrWeabo",
+    "electronLanguages": [
+      "en-US",
+      "id"
+    ],
+    "compression": "maximum",
+    "afterPack": "scripts/after-pack.js",
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "node_modules/**/*",
+      "!node_modules/koffi/build/koffi/{darwin_*,freebsd_*,linux_*,musl_*,openbsd_*,win32_arm64,win32_ia32}/**",
+      "!node_modules/koffi/{doc,src,vendor,lib}/**",
+      "!src/native/*.cpp",
+      "!src/native/*.obj",
+      "!src/native/*.rc",
+      "!src/native/*.res"
+    ],
+    "win": {
+      "icon": "assets/icon.ico",
+      "extraFiles": [
+        {
+          "from": "LICENSE",
+          "to": "LICENSE.TryDesk.txt"
+        },
+        {
+          "from": "NOTICE",
+          "to": "NOTICE.TryDesk.txt"
+        },
+        {
+          "from": "TRADEMARK.md",
+          "to": "TRADEMARK.TryDesk.md"
+        }
+      ],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.png",
+      "extraFiles": [
+        {
+          "from": "LICENSE",
+          "to": "LICENSE.TryDesk.txt"
+        },
+        {
+          "from": "NOTICE",
+          "to": "NOTICE.TryDesk.txt"
+        },
+        {
+          "from": "TRADEMARK.md",
+          "to": "TRADEMARK.TryDesk.md"
+        }
+      ],
+      "category": "Network",
+      "executableName": "trydesk",
+      "maintainer": "DrWeabo <support@trydesk.ai.id>",
+      "synopsis": "Free, open-source remote desktop (controls other PCs)",
+      "syncDesktopName": true,
+      "desktop": {
+        "entry": {
+          "Comment": "Free, open-source remote desktop: control your Windows PCs from Linux"
+        }
+      }
+    },
+    "mac": {
+      "icon": "assets/icon-mac.png",
+      "extraResources": [
+        {
+          "from": "LICENSE",
+          "to": "LICENSE.TryDesk.txt"
+        },
+        {
+          "from": "NOTICE",
+          "to": "NOTICE.TryDesk.txt"
+        },
+        {
+          "from": "TRADEMARK.md",
+          "to": "TRADEMARK.TryDesk.md"
+        }
+      ],
+      "category": "public.app-category.utilities",
+      "target": [
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "TryDesk-${version}-mac-${arch}.${ext}",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "extendInfo": {
+        "NSLocalNetworkUsageDescription": "TryDesk connects to Windows PCs on your local network when you use Connect by IP."
+      }
+    },
+    "appImage": {
+      "artifactName": "TryDesk-${version}-x86_64.AppImage"
+    },
+    "deb": {
+      "artifactName": "TryDesk-${version}-amd64.deb",
+      "depends": [
+        "libgtk-3-0",
+        "libnotify4",
+        "libnss3",
+        "libxss1",
+        "libxtst6",
+        "xdg-utils",
+        "libatspi2.0-0",
+        "libuuid1",
+        "libsecret-1-0",
+        "libasound2 | libasound2t64"
+      ]
+    },
+    "portable": {
+      "artifactName": "TryDesk-Portable.exe",
+      "unpackDirName": true
+    },
+    "nsis": {
+      "artifactName": "TryDesk-Setup-${version}.exe",
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "TryDesk",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "deleteAppDataOnUninstall": false,
+      "differentialPackage": false,
+      "include": "scripts/installer.nsh"
+    },
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/koffi/**",
+      "src/native/**"
+    ]
+  }
+}
