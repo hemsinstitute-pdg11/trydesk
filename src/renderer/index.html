@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self' wss://desk.trydesk.ai.id https://trydesk.ai.id; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TryDesk</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Android opening screen (hidden on the desktop by style.css): carries on from the system splash (same colour,
+       the mark in the middle), the name rises, and three segments fill on the real start-up steps (C). mobile.js
+       advances it and takes it away. -->
+  <div class="td-boot" id="td-boot" aria-hidden="true">
+    <div class="td-boot-mark"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+    <div class="td-boot-name">TryDesk</div>
+    <div class="td-boot-steps"><i></i><i></i><i></i></div>
+    <div class="td-boot-step" id="td-boot-step">Memuat aplikasi</div>
+  </div>
+  <!-- Title Bar -->
+  <div class="titlebar" id="titlebar">
+    <div class="titlebar-drag">
+      <div class="titlebar-logo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <path d="M8 21h8M12 17v4"/>
+        </svg>
+        <span>TryDesk</span>
+      </div>
+    </div>
+    <div class="titlebar-buttons">
+      <button class="tb-btn" id="btn-settings" title="Pengaturan">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
+      <button class="tb-btn" id="btn-minimize"><svg width="12" height="12" viewBox="0 0 12 12"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.5"/></svg></button>
+      <button class="tb-btn" id="btn-maximize"><svg width="12" height="12" viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7" fill="none" stroke="currentColor" stroke-width="1.3"/></svg></button>
+      <button class="tb-btn tb-close" id="btn-close"><svg width="12" height="12" viewBox="0 0 12 12"><line x1="2.5" y1="2.5" x2="9.5" y2="9.5" stroke="currentColor" stroke-width="1.5"/><line x1="9.5" y1="2.5" x2="2.5" y2="9.5" stroke="currentColor" stroke-width="1.5"/></svg></button>
+    </div>
+  </div>
+
+  <!-- "Cara pakai" Sambung lewat IP (owner pick 15 Nov, Arah 2): one step per screen, each with a small picture of the
+       part of the app it means, a progress line, and "Gagal tersambung?" for the problem list. Opened from Beranda and
+       Settings → Jaringan. The Indonesian and English halves are whole blocks (help-id / help-en) so sentences with bold
+       words stay whole; the buttons outside them are translated through TEXT_EN. -->
+  <div class="overlay hidden" id="overlay-lan-help" data-step="0">
+    <div class="settings-panel help-panel" role="dialog" aria-modal="true" aria-labelledby="lan-help-title">
+      <div class="settings-header lh-head">
+        <button class="settings-close lh-back" id="btn-lan-help-back" type="button" title="Kembali ke langkah" aria-label="Kembali ke langkah"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <h3 id="lan-help-title">Sambung lewat IP</h3>
+        <button class="lh-fixlink" id="btn-lan-help-fix" type="button">Gagal tersambung?</button>
+        <button class="settings-close" id="btn-lan-help-close" title="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="lh-prog lh-prog-top" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="settings-body help-body">
+        <div class="help-id">
+          <section class="lh-step" data-n="0">
+            <div class="lh-txt"><span class="lh-count">Langkah 1 dari 4</span><h4>Nyalakan Sambung lewat IP</h4><p>Di <b class="lh-path">Pengaturan<i>›</i>Jaringan</b>. Saat Windows bertanya soal firewall, pilih Jaringan pribadi, lalu Izinkan akses.</p><span class="lh-who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Di PC yang mau dikontrol</span></div>
+            <div class="lh-ill" aria-hidden="true">
+              <div class="lh-row"><div><b>Sambung lewat IP</b><small>Pengaturan › Jaringan</small></div><span class="lh-sw"></span></div>
+              <div class="lh-win"><div class="lh-wt">Keamanan Windows</div><div class="lh-wb"><span>Izinkan TryDesk di jaringan ini:</span><span class="lh-cbrow"><i class="lh-cb on"></i>Jaringan pribadi, seperti rumah atau kantor</span><span class="lh-cbrow"><i class="lh-cb"></i>Jaringan umum</span><span class="lh-wf"><span class="pri">Izinkan akses</span><span>Batal</span></span></div></div>
+            </div>
+          </section>
+          <section class="lh-step" data-n="1">
+            <div class="lh-txt"><span class="lh-count">Langkah 2 dari 4</span><h4>Pasang password akses</h4><p>Minimal 10 karakter, di <b class="lh-path">Pengaturan<i>›</i>Keamanan</b>. Tanpa password, sambungan lewat IP selalu ditolak.</p><span class="lh-who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Di PC yang mau dikontrol</span></div>
+            <div class="lh-ill" aria-hidden="true">
+              <div class="lh-row lh-col"><div><b>Password akses</b><small>Pengaturan › Keamanan</small></div><span class="lh-inp">•••••••••••</span><span class="lh-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>11 karakter, cukup untuk sambung lewat IP</span></div>
+            </div>
+          </section>
+          <section class="lh-step" data-n="2">
+            <div class="lh-txt"><span class="lh-count">Langkah 3 dari 4</span><h4>Lihat alamat IP-nya</h4><p>Tampil di Beranda, di baris Sambung lewat IP.</p><span class="lh-who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Di PC yang mau dikontrol</span></div>
+            <div class="lh-ill" aria-hidden="true">
+              <div class="lh-row"><div><small>Beranda</small><b>Sambung lewat IP</b></div><span class="lh-mono lh-ip">192.168.1.20</span><span class="lh-copy">Salin</span></div>
+              <small class="lh-note">Alamat ini contoh. Alamat PC Anda bisa berbeda.</small>
+            </div>
+          </section>
+          <section class="lh-step" data-n="3">
+            <div class="lh-txt"><span class="lh-count">Langkah 4 dari 4</span><h4>Ketik alamat IP itu, lalu Hubungkan</h4><p>Di kolom Masukkan ID atau alamat IP. Isi password PC tujuan saat diminta.</p><span class="lh-who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="14" height="10" rx="1.5"/><path d="M6 18h6"/><rect x="17" y="8" width="5.5" height="11" rx="1.2"/></svg><span class="lh-who-pc">Di PC atau HP yang mengontrol</span><span class="lh-who-m">Di HP ini</span></span></div>
+            <div class="lh-ill" aria-hidden="true">
+              <div class="lh-row lh-col"><small>Masukkan ID atau alamat IP</small><span class="lh-inp lh-mono">192.168.1.20</span><span class="lh-inp lh-dim">Password PC tujuan</span><span class="lh-go">Hubungkan</span></div>
+            </div>
+          </section>
+          <section class="lh-fix">
+            <h4>Kalau gagal <em>tersambung.</em></h4>
+            <div class="lh-fixg">
+              <div class="lh-fx"><b>"PC tujuan tidak menerima koneksi LAN"</b><p>Sakelar Sambung lewat IP di PC tujuan belum menyala, atau firewall memblokir. Di PC tujuan buka <b class="lh-path">Keamanan Windows<i>›</i>Firewall<i>›</i>Izinkan aplikasi</b>, centang TryDesk untuk Private, dan pastikan Wi-Fi atau kabelnya diset sebagai jaringan pribadi.</p></div>
+              <div class="lh-fx"><b>"Tidak ada TryDesk yang menjawab"</b><p>Kedua perangkat tidak di jaringan yang sama, atau Wi-Fi tamu dan hotspot memisahkan perangkat. Pakai Wi-Fi yang sama atau kabel LAN.</p></div>
+              <div class="lh-fx"><b>Kemarin bisa, sekarang tidak</b><p>Alamat IP bisa berubah setelah router dinyalakan ulang. Lihat lagi alamatnya di Beranda PC tujuan.</p></div>
+              <div class="lh-fx"><b>Ada antivirus dengan firewall sendiri</b><p>Sambungan ini memakai port TCP 7171. Izinkan TryDesk juga di antivirus itu.</p></div>
+            </div>
+          </section>
+        </div>
+        <div class="help-en" lang="en">
+          <section class="lh-step" data-n="0">
+            <div class="lh-txt"><span class="lh-count">Step 1 of 4</span><h4>Turn on Connect by IP</h4><p>In <b class="lh-path">Settings<i>›</i>Network</b>. When Windows asks about the firewall, choose Private networks, then Allow access.</p><span class="lh-who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>On the PC you want to control</span></div>
+            <div class="lh-ill" aria-hidden="true">
+              <div class="lh-row"><div><b>Connect by IP</b><small>Settings › Network</small></div><span class="lh-sw"></span></div>
+              <div class="lh-win"><div class="lh-wt">Windows Security</div><div class="lh-wb"><span>Allow TryDesk on these networks:</span><span class="lh-cbrow"><i class="lh-cb on"></i>Private networks, such as home or work</span><span class="lh-cbrow"><i class="lh-cb"></i>Public networks</span><span class="lh-wf"><span class="pri">Allow access</span><span>Cancel</span></span></div></div>
+            </div>
+          </section>
+          <section class="lh-step" data-n="1">
+            <div class="lh-txt"><span class="lh-count">Step 2 of 4</span><h4>Set an access password</h4><p>At least 10 characters, in <b class="lh-path">Settings<i>›</i>Security</b>. Without a password, connecting by IP is always refused.</p><span class="lh-who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>On the PC you want to control</span></div>
+            <div class="lh-ill" aria-hidden="true">
+              <div class="lh-row lh-col"><div><b>Access password</b><small>Settings › Security</small></div><span class="lh-inp">•••••••••••</span><span class="lh-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>11 characters, enough for Connect by IP</span></div>
+            </div>
+          </section>
+          <section class="lh-step" data-n="2">
+            <div class="lh-txt"><span class="lh-count">Step 3 of 4</span><h4>Find its IP address</h4><p>It shows on Home, in the Connect by IP row.</p><span class="lh-who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>On the PC you want to control</span></div>
+            <div class="lh-ill" aria-hidden="true">
+              <div class="lh-row"><div><small>Home</small><b>Connect by IP</b></div><span class="lh-mono lh-ip">192.168.1.20</span><span class="lh-copy">Copy</span></div>
+              <small class="lh-note">This address is an example. Your PC's address may differ.</small>
+            </div>
+          </section>
+          <section class="lh-step" data-n="3">
+            <div class="lh-txt"><span class="lh-count">Step 4 of 4</span><h4>Type that IP address, then Connect</h4><p>In the Enter an ID or IP address box. Enter the other PC's password when asked.</p><span class="lh-who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="14" height="10" rx="1.5"/><path d="M6 18h6"/><rect x="17" y="8" width="5.5" height="11" rx="1.2"/></svg><span class="lh-who-pc">On the controlling PC or phone</span><span class="lh-who-m">On this phone</span></span></div>
+            <div class="lh-ill" aria-hidden="true">
+              <div class="lh-row lh-col"><small>Enter an ID or IP address</small><span class="lh-inp lh-mono">192.168.1.20</span><span class="lh-inp lh-dim">The other PC's password</span><span class="lh-go">Connect</span></div>
+            </div>
+          </section>
+          <section class="lh-fix">
+            <h4>If it doesn't <em>connect.</em></h4>
+            <div class="lh-fixg">
+              <div class="lh-fx"><b>"The other PC doesn't accept LAN connections"</b><p>Connect by IP is off on that PC, or a firewall blocks it. On that PC open <b class="lh-path">Windows Security<i>›</i>Firewall<i>›</i>Allow an app</b>, tick TryDesk for Private, and make sure its Wi-Fi or cable network is set to Private.</p></div>
+              <div class="lh-fx"><b>"No TryDesk answered at this address"</b><p>The devices are not on the same network, or a guest Wi-Fi or hotspot keeps devices apart. Use the same Wi-Fi or a LAN cable.</p></div>
+              <div class="lh-fx"><b>It worked before, not now</b><p>The IP address can change after the router restarts. Check the address again on that PC's Home.</p></div>
+              <div class="lh-fx"><b>An antivirus with its own firewall</b><p>This connection uses TCP port 7171. Allow TryDesk in that antivirus too.</p></div>
+            </div>
+          </section>
+        </div>
+      </div>
+      <div class="lh-foot">
+        <div class="lh-prog" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <span class="lh-sp"></span>
+        <button class="lh-fixlink lh-fixlink-m" id="btn-lan-help-fix-2" type="button">Gagal tersambung?</button>
+        <button class="btn-secondary" id="btn-lan-help-settings" type="button">Buka pengaturan LAN</button>
+        <button class="btn-secondary" id="btn-lan-help-prev" type="button">Kembali</button>
+        <button class="btn-connect" id="btn-lan-help-next" type="button"><span>Berikutnya</span></button>
+        <button class="btn-connect" id="btn-lan-help-ok" type="button"><span>Mengerti</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Overlay -->
+  <!-- Design direction 2 "Panduan pengguna baru" (owner pick 13 Nov 2026, gallery claude.ai/artifact/TQ2xDmetKK66YDC8YttnAF):
+       opens on Ringkasan (four facts, a click opens the page that changes it), a menu with one line under each name,
+       every setting one row in a rounded group (name, one sentence, control), technical rows behind "Pengaturan lanjutan".
+       On a phone the menu becomes the list under Ringkasan and a page opens on its own with a back arrow. -->
+  <div class="overlay hidden" id="overlay-settings">
+    <div class="settings-panel">
+      <div class="settings-header">
+        <button class="settings-back" id="btn-settings-back" type="button" title="Kembali" aria-label="Kembali"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <h3 id="settings-head-title">Pengaturan</h3>
+        <button class="settings-close" id="btn-settings-close" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="settings-body">
+        <nav class="settings-tabs" aria-label="Halaman pengaturan">
+          <h2 class="stabs-title">Semua pengaturan</h2>
+          <button class="stab active" data-tab="tab-home"><svg class="stab-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="stab-tx"><b>Ringkasan</b><small>Keadaan PC ini</small></span></button>
+          <button class="stab" data-tab="tab-general"><svg class="stab-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg><span class="stab-tx"><b data-i18n="ui_general">Umum</b><small>Nama PC, tema, bahasa</small></span><svg class="stab-ch" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="stab" data-tab="tab-sound"><svg class="stab-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg><span class="stab-tx"><b>Suara</b><small>Bunyi dan pemberitahuan</small></span><svg class="stab-ch" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="stab" data-tab="tab-security"><svg class="stab-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg><span class="stab-tx"><b data-i18n="ui_security">Keamanan</b><small>Password dan izin tamu</small></span><svg class="stab-ch" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="stab" data-tab="tab-display"><svg class="stab-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span class="stab-tx"><b data-i18n="ui_quality_img">Kualitas gambar</b><small>Ketajaman dan suara</small></span><svg class="stab-ch" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="stab" data-tab="tab-connection"><svg class="stab-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5 13a10 10 0 0 1 14 0M8.5 16.5a5 5 0 0 1 7 0"/><circle cx="12" cy="20" r=".8"/></svg><span class="stab-tx"><b data-i18n="ui_network">Jaringan</b><small>Sambung lewat IP</small></span><svg class="stab-ch" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="stab" data-tab="tab-service"><svg class="stab-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/></svg><span class="stab-tx"><b data-i18n="ui_service">Layanan Windows</b><small>Aktif setelah restart</small></span><svg class="stab-ch" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="stab" data-tab="tab-advanced"><svg class="stab-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span class="stab-tx"><b data-i18n="ui_about">Tentang</b><small>Versi dan reset</small></span><svg class="stab-ch" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        </nav>
+
+        <div class="settings-tab-content" id="tab-home">
+          <h4 class="stitle">Pengaturan</h4>
+          <p class="sdesc">Keadaan PC ini sekarang. Klik kotak untuk mengubah.</p>
+          <div class="s-tiles">
+            <button class="s-tile" type="button" id="sum-in" data-tab="tab-security" data-go="#access-password"><small>Siapa yang boleh masuk</small><b id="sum-in-v">Selalu tanya dulu</b><span id="sum-in-h">Belum ada password akses</span><i>Ubah</i></button>
+            <button class="s-tile" type="button" id="sum-q" data-tab="tab-display" data-go="#s-quality"><small>Kualitas gambar</small><b id="sum-q-v">Bawaan</b><span id="sum-q-h">1000 Mbps · 240 FPS</span><i>Ubah</i></button>
+            <button class="s-tile" type="button" id="sum-svc" data-tab="tab-service"><small>Setelah restart</small><b id="sum-svc-v">Perlu TryDesk terbuka</b><span id="sum-svc-h">Layanan Windows belum dipasang</span><i>Ubah</i></button>
+            <button class="s-tile" type="button" id="sum-name" data-tab="tab-general" data-go="#device-alias"><small>Nama PC ini</small><b id="sum-name-v">Belum diberi nama</b><span>Terlihat oleh PC lain</span><i>Ubah</i></button>
+          </div>
+          <div class="sect">Sering diubah</div>
+          <div class="sgrp">
+            <div class="srow"><span class="srow-tx"><b>Tema</b></span><div class="set-seg theme-seg" role="radiogroup" aria-label="Tema"><button type="button" role="radio" data-v="dark">Gelap</button><button type="button" role="radio" data-v="light">Terang</button><button type="button" role="radio" data-v="system" class="theme-seg-system">Ikuti Windows</button></div></div>
+            <div class="srow"><span class="srow-tx"><b>Bahasa</b></span><select class="select-input" data-mirror="#setting-language" aria-label="Bahasa"><option value="id">Bahasa Indonesia</option><option value="en">English</option></select></div>
+            <div class="srow"><span class="srow-tx"><b>Buka TryDesk saat Windows menyala</b></span><label class="switch"><input type="checkbox" data-mirror="#setting-startup" aria-label="Buka TryDesk saat Windows menyala"><span class="switch-slider"></span></label></div>
+          </div>
+        </div>
+
+        <div class="settings-tab-content hidden" id="tab-general">
+          <h4 class="stitle">Umum</h4>
+          <p class="sdesc">Bagaimana PC ini terlihat oleh orang lain, dan bagaimana TryDesk terlihat oleh Anda.</p>
+          <div class="sect">PC ini</div>
+          <div class="sgrp">
+            <div class="srow col"><span class="srow-tx"><b>Nama perangkat</b><small>Terlihat oleh PC yang Anda hubungi.</small></span>
+              <div class="srow-ctrl"><input type="text" id="device-alias" class="input-field" placeholder="Misalnya PC-Kantor" maxlength="30" aria-label="Nama perangkat"><button class="btn-apply" id="btn-save-alias">Simpan</button></div></div>
+          </div>
+          <div class="sect">Tampilan</div>
+          <div class="sgrp">
+            <div class="srow"><span class="srow-tx"><b>Ikuti bahasa Windows</b><small>Bahasa TryDesk berganti mengikuti bahasa Windows di PC ini.</small></span><label class="switch"><input type="checkbox" id="setting-lang-system" aria-label="Ikuti bahasa Windows"><span class="switch-slider"></span></label></div>
+            <div class="srow col"><span class="srow-tx"><b>Bahasa</b><small>Berlaku langsung, tanpa membuka ulang TryDesk.</small></span>
+              <select id="setting-language" class="select-input" aria-label="Bahasa" hidden><option value="id" selected>Bahasa Indonesia</option><option value="en">English</option></select>
+              <div class="lang-cards" id="lang-cards" role="radiogroup" aria-label="Bahasa"></div></div>
+            <div class="srow"><span class="srow-tx"><b>Tema</b></span>
+              <select id="setting-theme" class="select-input" hidden><option value="dark" selected>Gelap</option><option value="light">Terang</option><option value="system">Ikuti Windows</option></select>
+              <div class="set-seg theme-seg" id="theme-seg" role="radiogroup" aria-label="Tema"><button type="button" role="radio" data-v="dark">Gelap</button><button type="button" role="radio" data-v="light">Terang</button><button type="button" role="radio" data-v="system" class="theme-seg-system" id="theme-seg-system">Ikuti Windows</button></div></div>
+          </div>
+          <div class="sect">Saat Windows menyala dan jendela ditutup</div>
+          <div class="sgrp">
+            <div class="srow"><span class="srow-tx"><b>Buka TryDesk saat Windows menyala</b><small class="hidden" id="startup-svc-note">Disarankan menyala selama layanan Windows terpasang: sesi lewat layanan tampil di jendela ini dengan semua tombol.</small></span><label class="switch"><input type="checkbox" id="setting-startup" aria-label="Buka TryDesk saat Windows menyala"><span class="switch-slider"></span></label></div>
+            <div class="srow"><span class="srow-tx"><b>Tetap aktif setelah jendela ditutup</b><small>TryDesk pindah ke ikon kecil di pojok kanan bawah, jadi PC ini tetap bisa dihubungi. Keluar lewat klik kanan ikon itu.</small></span><label class="switch"><input type="checkbox" id="setting-close-to-tray" checked aria-label="Tetap aktif setelah jendela ditutup"><span class="switch-slider"></span></label></div>
+          </div>
+          <div class="sect">Discord</div>
+          <div class="sgrp">
+            <div class="srow"><span class="srow-tx"><b>Tampilkan TryDesk di profil Discord</b><small>Teman Discord Anda melihat "Menggunakan TryDesk" serta apakah Anda sedang mengontrol atau dikontrol.</small></span><label class="switch"><input type="checkbox" id="setting-discord" checked aria-label="Tampilkan TryDesk di profil Discord"><span class="switch-slider"></span></label></div>
+          </div>
+        </div>
+
+        <!-- Suara (owner pick 19 Nov: concept "Suara untuk setiap kejadian", Set 1 Ketukan). The three rows that used to
+             sit in Umum moved here; their ids and saved values are the same. -->
+        <div class="settings-tab-content hidden" id="tab-sound">
+          <h4 class="stitle">Suara</h4>
+          <p class="sdesc">Bunyi pendek dari TryDesk sendiri. Suara PC yang Anda kontrol diatur di Control Center saat sesi.</p>
+          <div class="sect">Suara</div>
+          <div class="sgrp">
+            <div class="srow"><span class="srow-tx"><b>Bunyi TryDesk</b><small>Bunyi pendek saat ada kejadian penting.</small></span><label class="switch"><input type="checkbox" id="setting-snd" checked aria-label="Bunyi TryDesk"><span class="switch-slider"></span></label></div>
+            <div class="srow snd-dep"><span class="srow-tx"><b>Volume</b></span><div class="volume-row"><input type="range" id="setting-snd-volume" min="0" max="100" value="60" class="slider" aria-label="Volume bunyi TryDesk"><b class="slider-val" id="setting-snd-volume-num" aria-hidden="true">60%</b><button class="btn-secondary snd-try" id="btn-snd-try" type="button">Coba</button></div></div>
+          </div>
+          <div class="sect snd-dep">Bunyi untuk</div>
+          <div class="sgrp snd-dep">
+            <div class="srow"><span class="srow-tx"><b>Permintaan masuk dan sambungan</b><small>Ada yang ingin masuk, tersambung, terputus.</small></span><label class="switch"><input type="checkbox" id="setting-notify-sound" checked aria-label="Permintaan masuk dan sambungan"><span class="switch-slider"></span></label></div>
+            <div class="srow"><span class="srow-tx"><b>Chat</b><small>Pesan masuk. Pesan terkirim tidak berbunyi.</small></span><label class="switch"><input type="checkbox" id="setting-snd-chat" checked aria-label="Chat"><span class="switch-slider"></span></label></div>
+            <div class="srow"><span class="srow-tx"><b>Transfer file</b><small>Selesai atau gagal.</small></span><label class="switch"><input type="checkbox" id="setting-snd-file" checked aria-label="Transfer file"><span class="switch-slider"></span></label></div>
+            <div class="srow"><span class="srow-tx"><b>Pemberitahuan</b><small>Berhasil, gagal, peringatan.</small></span><label class="switch"><input type="checkbox" id="setting-snd-notice" checked aria-label="Pemberitahuan"><span class="switch-slider"></span></label></div>
+            <div class="srow"><span class="srow-tx"><b>Versi baru TryDesk</b></span><label class="switch"><input type="checkbox" id="setting-snd-update" checked aria-label="Versi baru TryDesk"><span class="switch-slider"></span></label></div>
+            <div class="srow"><span class="srow-tx"><b>Klik tombol utama</b><small>Hubungkan, Terima, Tolak, Salin.</small></span><label class="switch"><input type="checkbox" id="setting-ui-sound" checked aria-label="Klik tombol utama"><span class="switch-slider"></span></label></div>
+          </div>
+          <div class="sect">Saat sesi berjalan</div>
+          <div class="sgrp">
+            <div class="srow snd-dep"><span class="srow-tx"><b>Diam saat mode game</b><small>Hanya sambungan terputus dan permintaan masuk yang berbunyi.</small></span><label class="switch"><input type="checkbox" id="setting-snd-quiet-game" checked aria-label="Diam saat mode game"><span class="switch-slider"></span></label></div>
+            <div class="srow snd-dep"><span class="srow-tx"><b>Diam saat layar penuh</b><small>Pemberitahuan berhasil dan peringatan tidak berbunyi.</small></span><label class="switch"><input type="checkbox" id="setting-snd-quiet-fs" checked aria-label="Diam saat layar penuh"><span class="switch-slider"></span></label></div>
+            <div class="srow"><span class="srow-tx"><b>Beri tahu saat ada yang ingin masuk</b><small>Pemberitahuan Windows, tanpa bunyinya sendiri.</small></span><label class="switch"><input type="checkbox" id="setting-notify-incoming" checked aria-label="Beri tahu saat ada yang ingin masuk"><span class="switch-slider"></span></label></div>
+          </div>
+        </div>
+
+        <div class="settings-tab-content hidden" id="tab-security">
+          <h4 class="stitle">Keamanan</h4>
+          <p class="sdesc">Tanpa password, setiap koneksi harus Anda terima dulu. Dengan password, tamu yang tahu password langsung masuk.</p>
+          <div class="sec-summary" id="sec-summary">
+            <button class="sec-cell" data-go="#access-pw-card"><span class="sec-k">Saat ada yang meminta</span><b id="sec-in">Selalu tanya</b></button>
+            <button class="sec-cell" data-go="#setting-allow-input"><span class="sec-k">Yang boleh dilakukan</span><b id="sec-ctl">Mouse dan keyboard</b></button>
+            <button class="sec-cell" data-go="#btn-service-install" id="sec-svc-cell"><span class="sec-k">Setelah restart</span><b id="sec-svc">Perlu TryDesk terbuka</b></button>
+          </div>
+          <div class="sect">Password akses</div>
+          <!-- Design direction 2 "Kartu kunci" (owner's pick 15 Nov, claude.ai/artifact/MCf5n3tr5ndEehmhcKKMo8), with the
+               owner's two changes: when it was changed sits under the box, and the eye is inside the field. The card's
+               data-mode is the state (none / on / edit / del); app.js updateAccessPwUI() fills the words. -->
+          <div class="lk" id="access-pw-card" data-mode="none">
+            <div class="lk-head">
+              <h5 class="lk-h"><span id="access-pw-title">Belum ada password</span><em id="access-pw-mark">.</em></h5>
+              <p class="lk-p" id="access-pw-desc">Setiap koneksi menunggu Anda klik Terima. Buat password bila PC ini sering Anda buka dari jauh.</p>
+            </div>
+            <div class="lk-only lk-on lk-stack">
+              <div class="lk-dots" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg><b>••••••••</b></div>
+              <!-- What is in force right now (user report 12 Nov: after a change nobody could tell whether it was saved). -->
+              <div class="lk-meta" id="access-pw-state" role="status"></div>
+            </div>
+            <div class="lk-only lk-edit lk-stack">
+              <div class="pw-field">
+                <input type="password" id="access-password" placeholder="Ketik password baru" class="input-field" autocomplete="new-password" aria-label="Password baru">
+                <button class="pw-eye" id="btn-toggle-pass" type="button" title="Tampilkan / sembunyikan" aria-label="Tampilkan / sembunyikan" aria-pressed="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
+              <div class="lk-hint"><span id="pw-hint-min"><i class="lk-sq"></i>Minimal 6 karakter</span><span id="pw-hint-lan"><i class="lk-sq"></i>10 karakter atau lebih, untuk Sambung lewat IP</span></div>
+            </div>
+            <div class="lk-acts">
+              <button class="btn-apply lk-only lk-none" id="btn-pw-create" type="button">Buat password</button>
+              <button class="btn-secondary lk-only lk-on" id="btn-pw-change" type="button">Ganti password</button>
+              <button class="lk-txt lk-only lk-on" id="btn-clear-pass" type="button">Hapus</button>
+              <button class="btn-apply lk-only lk-edit" id="btn-save-pass" type="button">Simpan</button>
+              <button class="lk-txt lk-only lk-edit" id="btn-pw-cancel" type="button">Batal</button>
+              <button class="lk-dng lk-only lk-del" id="btn-pw-del-yes" type="button">Ya, hapus</button>
+              <button class="lk-txt lk-only lk-del" id="btn-pw-del-no" type="button">Batal</button>
+            </div>
+            <!-- The Windows service's password (it can still hold the old one when its UAC prompt was declined). -->
+            <div class="lk-svc hidden" id="access-pw-svc" role="status"><i class="lk-dot" aria-hidden="true"></i><span class="lk-svc-tx" id="access-pw-svc-text"></span><button class="btn-secondary hidden" id="btn-pw-svc-retry" type="button">Perbarui layanan</button></div>
+          </div>
+          <div class="sgrp lk-after">
+            <div class="srow"><span class="srow-tx"><b>Langsung masuk bila password benar</b><small>Matikan bila Anda tetap ingin menekan Terima.</small></span><label class="switch"><input type="checkbox" id="setting-autoaccept" checked aria-label="Langsung masuk bila password benar"><span class="switch-slider"></span></label></div>
+          </div>
+          <div class="sect">Yang boleh dilakukan tamu</div>
+          <div class="sgrp">
+            <div class="srow"><span class="srow-tx"><b>Mouse dan keyboard</b></span><label class="switch"><input type="checkbox" id="setting-allow-input" checked aria-label="Mouse dan keyboard"><span class="switch-slider"></span></label></div>
+            <div class="srow"><span class="srow-tx"><b>Salin dan tempel teks</b></span><label class="switch"><input type="checkbox" id="setting-allow-clipboard" checked aria-label="Salin dan tempel teks"><span class="switch-slider"></span></label></div>
+            <div class="srow"><span class="srow-tx"><b>Kirim dan ambil file</b></span><label class="switch"><input type="checkbox" id="setting-allow-file" checked aria-label="Kirim dan ambil file"><span class="switch-slider"></span></label></div>
+            <div class="srow"><span class="srow-tx"><b>Hanya melihat layar</b><small>Tamu tidak bisa klik atau mengetik.</small></span><label class="switch"><input type="checkbox" id="setting-allow-viewonly" aria-label="Hanya melihat layar"><span class="switch-slider"></span></label></div>
+          </div>
+          <div class="sect">ID PC ini</div>
+          <div class="sgrp">
+            <div class="srow"><span class="srow-tx"><b class="set-my-id" id="set-my-id">-</b><small>ID lama berhenti berlaku bila Anda membuat yang baru.</small></span><button class="btn-secondary set-regen" id="btn-regen-id-2" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg><span>Buat ID baru</span></button></div>
+          </div>
+          <div class="sect">Pengaman sesi</div>
+          <div class="sgrp">
+            <div class="srow"><span class="srow-tx"><b>Kunci Windows setelah sesi selesai</b></span><label class="switch"><input type="checkbox" id="setting-lock-after-session" aria-label="Kunci Windows setelah sesi selesai"><span class="switch-slider"></span></label></div>
+            <div class="srow"><span class="srow-tx"><b>Putuskan otomatis setelah</b></span><select id="setting-session-timeout" class="select-input" aria-label="Putuskan otomatis setelah"><option value="0" selected>Tanpa batas</option><option value="30">30 menit</option><option value="60">1 jam</option><option value="120">2 jam</option><option value="480">8 jam</option></select></div>
+            <div class="srow"><span class="srow-tx"><b>Blokir setelah 3 kali password salah</b><small>Peminta diblokir 5 sampai 20 menit.</small></span><label class="switch"><input type="checkbox" id="setting-brute-force" checked aria-label="Blokir setelah 3 kali password salah"><span class="switch-slider"></span></label></div>
+          </div>
+          <button class="adv-toggle" type="button" aria-expanded="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span>Pengaturan lanjutan</span> <small class="adv-count"></small></button>
+          <div class="adv-body" hidden>
+            <div class="sect">Jendela administrator</div>
+            <div class="sgrp">
+              <div class="srow" id="admin-group" style="display:none"><span class="srow-tx"><b>Kontrol jendela administrator</b><small>Perlu agar klik dan ketik bekerja di jendela seperti CMD admin. TryDesk dibuka ulang dengan izin administrator.</small></span><button class="btn-secondary" id="btn-run-admin" type="button">Jalankan sebagai admin</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-tab-content hidden" id="tab-display">
+          <h4 class="stitle">Kualitas gambar</h4>
+          <p class="sdesc">Dipakai setiap kali sesi baru dibuka. Saat sesi berjalan, ubah lewat Control Center.</p>
+          <div class="sect">Kualitas bawaan</div>
+          <select id="setting-default-quality" class="select-input" hidden aria-hidden="true" tabindex="-1">
+            <option value="default" selected>Bawaan (1000 Mbps / 240 FPS)</option>
+            <option value="hemat">Hemat (3 Mbps / 15 FPS)</option>
+            <option value="seimbang">Seimbang (20 Mbps / 30 FPS)</option>
+            <option value="kualitas">Kualitas (60 Mbps / 60 FPS)</option>
+            <option value="ultra">Ultra (150 Mbps / 120 FPS)</option>
+            <option value="gaming">Gaming (300 Mbps / 165 FPS)</option>
+            <option value="maksimal">Maksimal (1000 Mbps / 240 FPS)</option>
+            <option value="custom" hidden>Kustom (diatur di panel Kualitas)</option>
+          </select>
+          <!-- The choices as rows (filled by app.js from the select above, which stays the one source of truth). -->
+          <div class="s-qlist" id="s-quality" role="radiogroup" aria-label="Kualitas bawaan"></div>
+          <div class="sect">Suara dari PC jauh</div>
+          <div class="sgrp">
+            <div class="srow"><span class="srow-tx"><b>Putar suara otomatis saat sesi dimulai</b></span><label class="switch"><input type="checkbox" id="setting-auto-audio" checked aria-label="Putar suara otomatis saat sesi dimulai"><span class="switch-slider"></span></label></div>
+            <div class="srow"><span class="srow-tx"><b>Volume</b></span><div class="volume-row"><input type="range" id="setting-audio-volume" min="0" max="100" value="100" class="slider" aria-label="Volume suara dari PC jauh"><b class="slider-val" id="setting-audio-volume-num" aria-hidden="true">100%</b></div></div>
+          </div>
+          <div class="sect">Tampilan sesi</div>
+          <div class="sgrp">
+            <div class="srow"><span class="srow-tx"><b>Ukuran gambar</b></span><select id="setting-default-scale" class="select-input" aria-label="Ukuran gambar"><option value="fit" selected>Pas dengan jendela</option><option value="1">100% (1:1 piksel)</option><option value="0.75">75%</option><option value="0.5">50%</option></select></div>
+            <div class="srow"><span class="srow-tx"><b>Tampilkan angka kecepatan</b><small>FPS, ping, dan kecepatan di pojok layar.</small></span><label class="switch"><input type="checkbox" id="setting-autostats" aria-label="Tampilkan angka kecepatan"><span class="switch-slider"></span></label></div>
+          </div>
+          <button class="adv-toggle" type="button" aria-expanded="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span>Pengaturan lanjutan</span> <small class="adv-count"></small></button>
+          <div class="adv-body" hidden>
+            <div class="sect">Format video</div>
+            <div class="sgrp">
+              <div class="srow"><span class="srow-tx"><b>Format video</b><small>Biarkan Otomatis, kecuali diminta saat ada masalah.</small></span><select id="setting-default-codec" class="select-input" aria-label="Format video"><option value="auto" selected>Otomatis (disarankan)</option><option value="AV1">AV1 (paling hemat data)</option><option value="VP9">VP9 (seimbang)</option><option value="VP8">VP8 (paling cocok untuk PC lama)</option><option value="H265">H.265 (lebih tajam)</option><option value="H264">H.264 (dibantu kartu grafis)</option></select></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-tab-content hidden" id="tab-connection">
+          <h4 class="stitle">Jaringan</h4>
+          <p class="sdesc">Sambung di jaringan yang sama, sambung ulang, dan batas kecepatan.</p>
+          <div class="sect">Jaringan yang sama</div>
+          <div class="sgrp">
+            <div class="srow"><span class="srow-tx"><b>Sambung lewat IP</b><small>PC lain di Wi-Fi atau kabel yang sama bisa tersambung dengan mengetik IP PC ini, tanpa internet. Perlu password akses minimal 10 huruf. Saat pertama dinyalakan, Windows meminta izin firewall. <button class="link-btn" id="btn-lan-help-2" type="button">Cara pakai</button></small><small class="lan-addr hidden" id="setting-lan-addr"></small></span><label class="switch"><input type="checkbox" id="setting-lan" aria-label="Sambung lewat IP"><span class="switch-slider"></span></label></div>
+          </div>
+          <div class="sect">Saat tersambung</div>
+          <div class="sgrp">
+            <div class="srow"><span class="srow-tx"><b>Sambung ulang otomatis bila terputus</b></span><label class="switch"><input type="checkbox" id="setting-auto-reconnect" aria-label="Sambung ulang otomatis bila terputus"><span class="switch-slider"></span></label></div>
+            <div class="srow"><span class="srow-tx"><b>Berhenti menunggu setelah</b></span><select id="setting-timeout" class="select-input" aria-label="Berhenti menunggu setelah"><option value="30">30 detik</option><option value="60" selected>60 detik</option><option value="120">120 detik</option><option value="300">5 menit</option><option value="0">Tanpa batas</option></select></div>
+          </div>
+          <div class="sect">Saat PC ini dikontrol</div>
+          <div class="sgrp">
+            <div class="srow"><span class="srow-tx"><b>Jangan biarkan layar mati</b><small>Layar tetap menyala selama sesi.</small></span><label class="switch"><input type="checkbox" id="setting-prevent-sleep" aria-label="Jangan biarkan layar mati"><span class="switch-slider"></span></label></div>
+          </div>
+          <button class="adv-toggle" type="button" aria-expanded="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span>Pengaturan lanjutan</span> <small class="adv-count"></small></button>
+          <div class="adv-body" hidden>
+            <div class="sect">Saat PC ini dikontrol</div>
+            <div class="sgrp">
+              <div class="srow"><span class="srow-tx"><b>Batas kecepatan kirim</b><small>Supaya internet lain di rumah tidak terganggu.</small></span><select id="setting-bw-limit" class="select-input" aria-label="Batas kecepatan kirim"><option value="0" selected>Tanpa batas</option><option value="5">5 Mbps</option><option value="10">10 Mbps</option><option value="20">20 Mbps</option><option value="50">50 Mbps</option><option value="100">100 Mbps</option><option value="200">200 Mbps</option><option value="500">500 Mbps</option></select></div>
+            </div>
+            <div class="sect">Jalur koneksi</div>
+            <div class="sgrp">
+              <div class="srow"><span class="srow-tx"><b>Jalur koneksi</b><small>Langsung dulu. Bila tidak bisa, lewat server TryDesk.</small></span><select id="setting-connection-protocol" class="select-input" aria-label="Jalur koneksi"><option value="auto" selected>Otomatis (disarankan)</option><option value="p2p">Selalu langsung</option><option value="relay">Selalu lewat server</option></select></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-tab-content hidden" id="tab-service">
+          <h4 class="stitle">Layanan Windows</h4>
+          <p class="sdesc">PC ini tetap bisa dikontrol setelah restart dan saat sesi RDP diputus, dengan ID yang sama.</p>
+          <div id="service-group" style="display:none">
+            <div class="sect">Status</div>
+            <div class="sgrp">
+              <div class="srow col"><div class="svc-state" id="service-state"></div><small class="svc-sub" id="service-sub"></small></div>
+            </div>
+            <div class="sect">Pilihan</div>
+            <div class="sgrp">
+              <div class="srow" id="service-install-row"><span class="srow-tx"><b>Pasang layanan</b><small>Tanpa password akses, setiap koneksi tetap meminta Terima.</small></span><button class="btn-apply" id="btn-service-install" type="button">Pasang layanan</button></div>
+              <div class="srow hidden" id="service-remove-row"><span class="srow-tx"><b>Hapus layanan</b><small>PC ini hanya bisa dihubungi saat TryDesk terbuka.</small></span><button class="btn-setting-danger" id="btn-service-remove" type="button">Hapus layanan</button></div>
+            </div>
+          </div>
+          <div class="s-note" id="service-none"><b id="service-none-t">Memakai versi Portable?</b><span id="service-none-d">Versi Portable tidak memasang layanan, jadi PC ini hanya bisa dihubungi saat TryDesk terbuka. Pakai versi Setup bila PC ini harus tetap bisa dihubungi setelah restart.</span></div>
+        </div>
+
+        <div class="settings-tab-content hidden" id="tab-advanced">
+          <h4 class="stitle">Tentang</h4>
+          <p class="sdesc">Informasi TryDesk dan mengembalikan pengaturan ke awal.</p>
+          <div id="upd-settings" hidden>
+            <div class="sect">Pembaruan</div>
+            <div class="sgrp">
+              <div class="srow"><span class="srow-tx"><b>Pembaruan otomatis</b><small>Diunduh di latar dan diperiksa tanda tangannya, lalu dipasang saat TryDesk ditutup atau dibuka lagi. Sesi tidak pernah diputus.</small></span><label class="switch"><input type="checkbox" id="setting-auto-update" checked aria-label="Pembaruan otomatis"><span class="switch-slider"></span></label></div>
+              <div class="srow"><span class="srow-tx"><b id="upd-status-t">TryDesk sudah versi terbaru</b><small id="upd-status-d">Dicek saat TryDesk dibuka, lalu tiap 6 jam.</small></span><button class="btn-secondary" id="btn-upd-action" type="button">Cek sekarang</button></div>
+            </div>
+          </div>
+          <div class="sect">TryDesk</div>
+          <div class="sgrp">
+            <div class="srow col about-info">
+              <div class="about-row"><span>Versi</span><b id="about-version">TryDesk</b></div>
+              <div class="about-row"><span>Lisensi</span><b>AGPL-3.0, gratis</b></div>
+              <div class="about-row"><span>Kode sumber</span><a href="https://trydesk.ai.id/source/" class="about-link" data-external>trydesk.ai.id/source</a></div>
+              <div class="about-row"><span>Dibuat oleh</span><b>DrWeabo</b></div>
+            </div>
+          </div>
+          <button class="adv-toggle" type="button" aria-expanded="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span>Pengaturan lanjutan</span> <small class="adv-count"></small></button>
+          <div class="adv-body" hidden>
+            <div class="sect">Kartu grafis</div>
+            <div class="sgrp">
+              <div class="srow"><span class="srow-tx"><b>Pakai kartu grafis (GPU)</b><small>Matikan bila gambar rusak atau berkedip. Berlaku setelah TryDesk dibuka ulang.</small></span><label class="switch"><input type="checkbox" id="setting-hw-accel" checked aria-label="Pakai kartu grafis (GPU)"><span class="switch-slider"></span></label></div>
+            </div>
+          </div>
+          <div class="sect">Kembalikan ke awal</div>
+          <div class="s-danger"><span class="srow-tx"><b>Kembalikan semua pengaturan</b><small>ID, PC favorit, riwayat koneksi, dan password akses tetap disimpan.</small></span><button class="btn-setting-danger" id="btn-reset-settings" type="button">Kembalikan</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accept request overlay (AnyDesk-style) -->
+  <div class="overlay hidden" id="overlay-accept">
+    <div class="accept-card">
+      <div class="accept-pulse-ring"></div>
+      <div class="accept-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      </div>
+      <h3>Permintaan masuk</h3>
+      <div class="accept-from">
+        <span class="accept-label">Dari perangkat</span>
+        <span class="accept-id" id="accept-id">- - -</span>
+        <span class="accept-alias" id="accept-alias"></span>
+      </div>
+      <div class="accept-info">
+        <div class="accept-info-row">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>Melihat layar</span>
+        </div>
+        <div class="accept-info-row" id="accept-perm-control">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
+          <span>Mouse dan keyboard</span>
+        </div>
+        <div class="accept-info-row" id="accept-perm-files">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+          <span>File</span>
+        </div>
+        <div class="accept-info-row" id="accept-perm-clipboard">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg>
+          <span>Clipboard</span>
+        </div>
+      </div>
+      <p class="accept-pw-hint hidden" id="accept-pw-hint"></p>
+      <!-- Remote-support scams start with a call asking to accept: say plainly who never needs this. -->
+      <p class="accept-warning">Jangan terima jika Anda tidak sedang meminta bantuan. Orang yang mengaku dari bank, toko, atau layanan resmi tidak perlu mengontrol PC Anda.</p>
+      <div class="accept-timer">
+        <div class="accept-timer-bar" id="accept-timer-bar"></div>
+      </div>
+      <p class="accept-countdown" id="accept-countdown" aria-live="off"></p>
+      <!-- Reject first and the same size as Accept: the dialog must not nudge toward letting someone in. -->
+      <div class="accept-actions">
+        <button class="btn-reject-main" id="btn-reject">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Tolak
+        </button>
+        <button class="btn-accept-main" id="btn-accept">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Terima
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Home Screen -->
+  <div class="screen" id="screen-home">
+    <!-- Home: this device (left, open) beside the stage for connecting (right, the one boxed panel), over the saved
+         sessions (tabs + search). Desktop styling is design direction A; the phone keeps its cards via mobile.css. -->
+    <div class="home">
+      <!-- Update notice (version.json on the website): dismissable for a normal release; red and permanent when this
+           version is below the safe minimum (then connections are refused until TryDesk is updated). -->
+      <!-- In-app updates (src/updater.js, owner 18 Nov 2026): the same strip says "available", "downloading", "ready to
+           install", "installed" and "file didn't match", as the session notice looks (direction A). -->
+      <div class="update-bar hidden" id="update-bar" role="status" aria-live="polite">
+        <span class="update-ic" id="update-ic" aria-hidden="true"></span>
+        <div class="update-copy"><b id="update-title"></b><span id="update-text"></span><span class="update-prog hidden" id="update-prog"><i></i></span></div>
+        <button class="update-btn hidden" id="update-notes" type="button">Yang baru</button>
+        <button class="update-btn" id="update-download" type="button">Unduh</button>
+        <button class="icon-btn" id="update-dismiss" type="button" title="Tutup" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="home-top">
+        <section class="hcard hcard-device panel-left">
+          <div class="hcard-head">
+            <span class="status-dot" id="status-dot"></span>
+            <span data-i18n="ui_desktop_this">Desktop ini</span><span class="home-state" id="home-state"></span>
+          </div>
+          <div class="hcard-body id-section">
+            <label class="desk-sr" data-i18n="ui_your_id">ID Anda</label>
+            <div class="id-row">
+              <span class="id-text">Menghubungkan...</span>
+              <div class="id-note" data-i18n="ui_id_note">Berikan ID ini ke orang yang akan membantu Anda.</div>
+              <button class="chip-btn" id="btn-copy" title="Salin ID"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg><span>Salin ID</span></button>
+              <button class="icon-btn" id="btn-regen-id" title="Buat ID baru" data-i18n-title="ui_regen_id_title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg><span class="regen-label">ID baru</span></button>
+            </div>
+            <!-- What decides how others get in: the access password, and connecting by IP on the local network. -->
+            <div class="home-facts" id="home-facts">
+              <div class="fact">
+                <span class="fact-label">Password akses</span>
+                <span class="fact-value" id="fact-pw-val">Belum diatur</span>
+                <button class="fact-btn" id="fact-pw-btn">Atur</button>
+              </div>
+              <div class="fact">
+                <span class="fact-label">Sambung lewat IP <button class="fact-help" id="fact-lan-help" type="button" title="Cara sambung lewat IP" aria-label="Cara sambung lewat IP"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button></span>
+                <span class="fact-value" id="fact-lan-val">Nonaktif</span>
+                <button class="fact-btn" id="fact-lan-btn">Aktifkan</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="hcard hcard-remote panel-right">
+          <!-- The stage: one sentence that says what to do (key word red), as in the portfolio video. Each word is
+               its own text node so the EN text map translates it; the words rise in when the home screen shows. -->
+          <h2 class="hcard-head stage-title"><span class="w"><span>Masukkan ID,</span></span><br><span class="w"><span>lalu</span></span> <span class="w"><em>Hubungkan.</em></span></h2>
+          <div class="hcard-body connect-section">
+            <label class="desk-sr" for="remote-id" data-i18n="ui_remote_id">ID Remote</label>
+            <input type="text" id="remote-id" placeholder="Masukkan ID atau alamat IP" data-i18n-ph="ph_remote_id" class="input-field input-id" maxlength="64" autocomplete="off">
+            <input type="password" id="remote-password" placeholder="Password (jika diminta)" data-i18n-ph="ph_password" class="input-field" autocomplete="off">
+            <div class="connect-actions">
+              <button class="btn-connect" id="btn-connect">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                <span data-i18n="ui_connect">Hubungkan</span>
+              </button>
+              <button class="btn-secondary" id="btn-connect-files" title="Hubungkan dan langsung buka Manajer file">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                <span>Transfer file</span>
+              </button>
+            </div>
+            <button class="link-btn" id="btn-lan-help">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span>Satu jaringan? Sambung lewat IP</span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Desktop (first concept, picture 1): the four latest PCs in one row; "Semua perangkat" opens the full list. -->
+      <section class="recent-strip" id="recent-strip" aria-labelledby="rs-title">
+        <div class="rs-head">
+          <h3 id="rs-title" data-i18n="ui_recent_title">Terakhir dihubungi</h3>
+          <!-- Kelola banyak perangkat (owner 19 Nov, concept v7): the same plain link as "Semua perangkat", side by side -->
+          <button class="rs-all" id="rs-manage" type="button">Kelola banyak perangkat</button>
+          <button class="rs-all" id="rs-all" type="button"><span>Semua perangkat</span> (<span id="rs-count">0</span>)</button>
+        </div>
+        <div class="rs-row" id="rs-row"></div>
+      </section>
+
+      <section class="hcard hcard-sessions">
+        <div class="dev-head">
+          <button class="settings-back" id="dev-back" type="button" title="Kembali" aria-label="Kembali"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <h2 class="dev-title">Perangkat<em>.</em></h2>
+        </div>
+        <div class="sess-head recent-head">
+          <!-- Concept: a title, then Semua / Favorit as one segmented control with their counts. -->
+          <h3 class="recent-title" data-i18n="ui_recent_title">Terakhir dihubungi</h3>
+          <div class="sess-tabs" role="tablist">
+            <button class="sess-tab active" role="tab" data-sess="recent"><span data-i18n="ui_all">Semua</span><span class="sess-count" id="count-recent">0</span></button>
+            <button class="sess-tab" role="tab" data-sess="fav"><span data-i18n="ui_favorites">Favorit</span><span class="sess-count" id="count-fav">0</span></button>
+          </div>
+          <div class="recent-head-actions">
+            <label class="sess-search">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input type="text" id="sess-search" placeholder="Cari ID atau nama" autocomplete="off" spellcheck="false">
+            </label>
+            <div class="view-toggle">
+              <button id="view-grid" class="view-btn active" title="Tampilan grid"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+              <button id="view-list" class="view-btn" title="Tampilan daftar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+            </div>
+            <!-- Sort and "clear all" live in the ⋮ menu (concept); the select and button stay as the state holders. -->
+            <select id="recent-sort" class="recent-sort" title="Urutkan" hidden>
+              <option value="recent" data-i18n="ui_sort_recent">Terbaru</option>
+              <option value="id" data-i18n="ui_sort_id">Nomor ID</option>
+            </select>
+            <button id="recent-clear" class="recent-clear" title="Hapus semua riwayat" data-i18n="ui_clear_all" hidden>Hapus semua</button>
+            <button id="recent-more" class="view-btn recent-more" title="Lainnya" aria-haspopup="menu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button>
+          </div>
+        </div>
+        <div class="recent-section" id="recent-section"><div class="recent-grid" id="recent-list"></div></div>
+        <div class="recent-section hidden" id="favorites-section"><div class="recent-grid" id="favorites-list"></div></div>
+        <div class="sess-empty hidden" id="sess-empty"></div>
+      </section>
+
+      <!-- Kelola banyak perangkat (concept D9bd v7, direction A): its own page; built by kmRender() in app.js -->
+      <section class="km" id="km" aria-labelledby="km-title">
+        <div class="km-head">
+          <button class="settings-back" id="km-back" type="button" title="Kembali" aria-label="Kembali"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <h2 class="dev-title" id="km-title">Kelola banyak perangkat<em>.</em></h2>
+        </div>
+        <div class="km-row" id="km-row"></div>
+        <div class="km-bn hidden" id="km-banner" role="status"></div>
+        <div class="km-grid" id="km-grid"></div>
+        <div class="km-foot" id="km-foot"></div>
+        <div id="km-panel"></div>
+      </section>
+    </div>
+    <!-- Gagal tersambung. Arah 3 (owner pick 15 Nov): who it was, one big word ("Ditolak."), why, and numbered steps
+         that each carry their own button; Kembali / Coba lagi in a bar at the bottom. -->
+    <div class="fail-view hidden" id="fail-view" role="alertdialog" aria-labelledby="fail-title">
+      <div class="fail-inner">
+        <span class="fail-kick" id="fail-who"></span>
+        <h2 class="fail-title" id="fail-title"></h2>
+        <p class="fail-sub" id="fail-sub"></p>
+        <ol class="fail-tips" id="fail-tips"></ol>
+      </div>
+      <div class="fail-actions">
+        <button class="btn-secondary" id="fail-home" type="button">Kembali ke Beranda</button>
+        <span class="fail-sp"></span>
+        <button class="btn-connect" id="fail-retry" type="button">Coba lagi</button>
+      </div>
+    </div>
+    <div class="status-bar">
+      <span id="status-text">Menghubungkan ke server...</span>
+      <span class="status-version" id="status-version">TryDesk</span>
+    </div>
+  </div>
+
+  <!-- Connecting Screen -->
+  <div class="screen hidden" id="screen-connecting">
+    <div class="connecting-container">
+      <div class="connect-anim">
+        <div class="connect-ring ring1"></div>
+        <div class="connect-ring ring2"></div>
+        <div class="connect-ring ring3"></div>
+        <div class="connect-core">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </div>
+      </div>
+      <p id="connecting-text">Menunggu remote desktop menerima</p>
+      <h2 id="connecting-title">Menghubungkan</h2>
+      <div class="connect-steps" id="connect-steps">
+        <div class="cstep active" id="cstep-1">
+          <div class="cstep-dot"></div>
+          <span>Server sinyal</span>
+        </div>
+        <div class="cstep" id="cstep-2">
+          <div class="cstep-dot"></div>
+          <span>Menunggu PC menerima</span>
+        </div>
+        <div class="cstep" id="cstep-3">
+          <div class="cstep-dot"></div>
+          <span>Jalur langsung (P2P)</span>
+        </div>
+      </div>
+      <!-- Shown when the host has an access password and asks again (none typed, or a wrong one). The host's
+           Accept dialog is open at the same time: whichever comes first,the password or a click,wins. -->
+      <!-- While it is open the screen shows only this form (style.css hides the ring and the steps). -->
+      <!-- Layout: the PC being opened (same preview + name + ID as its Recent tile), then one field and one button. -->
+      <form class="connect-pw hidden" id="connect-pw" autocomplete="off">
+        <div class="cpw-peer">
+          <div class="tile-preview" id="connect-pw-thumb" aria-hidden="true"></div>
+          <div class="cpw-peer-text">
+            <span class="cpw-peer-name" id="connect-pw-name"></span>
+            <span class="cpw-peer-id" id="connect-pw-peer"></span>
+          </div>
+        </div>
+        <label class="cpw-title" for="connect-pw-input">PC ini meminta <em>password.</em></label>
+        <input type="password" id="connect-pw-input" class="input-field" autocomplete="off">
+        <p class="connect-pw-msg" id="connect-pw-msg" role="status"></p>
+        <button type="submit" class="btn-connect cpw-go" id="connect-pw-go">Masuk</button>
+        <p class="cpw-wait" id="connect-pw-wait"><span id="connect-pw-wait-text"></span></p>
+      </form>
+      <button class="btn-cancel" id="btn-cancel-connect">Batalkan</button>
+    </div>
+  </div>
+
+  <!-- Being Controlled Screen. Arah 3 "Tegas" (owner pick 15 Nov, gallery https://claude.ai/artifact/BfU2kdS1ZifaBFhMddwFjA):
+       the controller's name and the session time in very large type, three switches for what the guest may do (the
+       same settings as Settings > Keamanan, changed live), and Chat / Kirim file / Putuskan sesi in a bar at the bottom. -->
+  <div class="screen hidden" id="screen-hosting">
+    <div class="hosting-container h3x">
+      <span class="h3-kick"><span class="h3-dot" aria-hidden="true"></span><span id="hosting-peer-label">PC ini sedang dikontrol oleh</span></span>
+      <div class="h3-top">
+        <div class="h3-who"><h2 class="host-title" id="hosting-name">-</h2><span class="h3-id" id="hosting-peer-id"></span></div>
+        <div class="h3-timer"><b class="hosting-timer" id="hosting-timer">00:00</b><small>lama sesi</small></div>
+      </div>
+      <p class="blackscreen-notice hidden" id="blackscreen-notice">Layar Anda digelapkan oleh remote</p>
+      <div class="h3-perms">
+        <div class="h3-perm" id="hp-input"><div class="h3-pt"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="6"/><path d="M12 7v4"/></svg><label class="switch"><input type="checkbox" id="host-perm-input" aria-label="Mouse dan keyboard"><span class="switch-slider"></span></label></div><b>Mouse dan keyboard</b><small class="h3-ps"></small></div>
+        <div class="h3-perm" id="hp-clip"><div class="h3-pt"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg><label class="switch"><input type="checkbox" id="host-perm-clip" aria-label="Salin dan tempel teks"><span class="switch-slider"></span></label></div><b>Salin dan tempel teks</b><small class="h3-ps"></small></div>
+        <div class="h3-perm" id="hp-file"><div class="h3-pt"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3-3 3 3"/></svg><label class="switch"><input type="checkbox" id="host-perm-file" aria-label="Kirim dan ambil file"><span class="switch-slider"></span></label></div><b>Kirim dan ambil file</b><small class="h3-ps"></small></div>
+      </div>
+      <p class="h3-note">Sakelar ini sama dengan Pengaturan › Keamanan.</p>
+    </div>
+    <div class="h3-bar">
+      <button class="btn-host-action" id="btn-host-chat" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Chat
+        <span class="unread-dot hidden" id="chat-unread-host"></span>
+      </button>
+      <button class="btn-host-action" id="btn-host-send-file" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
+        Kirim file
+      </button>
+      <span class="h3-sp"></span>
+      <button class="btn-host-disconnect" id="btn-stop-hosting" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Putuskan sesi
+      </button>
+    </div>
+  </div>
+
+  <!-- Remote View Screen -->
+  <div class="screen hidden" id="screen-remote">
+    <!-- One session bar (design direction A + B): the open sessions as tabs on the left (one per PC + "＋"),
+         latency, timer, Control Center, Putuskan and the window buttons on the right. In full screen it steps away
+         for the floating dock below (#fs-dock). -->
+    <div class="session-bar" id="session-bar">
+      <div class="sb-left" id="sb-drag">
+        <div class="remote-tabs" id="remote-tabs"></div>
+        <span class="sb-peer" id="remote-peer-id">Terhubung</span>
+        <span class="sb-badge sb-lat" id="rt-latency-badge">- ms</span>
+        <span class="sb-badge sb-timer" id="session-timer">00:00</span>
+      </div>
+      <div class="sb-right">
+        <!-- Control Center (nested, StarDesk-style) -->
+        <div class="cc-wrap">
+          <button class="cc-btn" id="btn-control-center" title="Control Center">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+            <span>Control Center</span>
+            <svg class="cc-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="control-center hidden" id="control-center"></div>
+          <div class="cc-flyout hidden" id="cc-flyout"></div>
+        </div>
+        <button class="sb-btn sb-disconnect" id="btn-disconnect" title="Putuskan"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span>Putuskan</span></button>
+        <div class="sb-divider"></div>
+        <div class="sb-wincontrols">
+          <button class="sb-winbtn" id="grip-minimize" title="Perkecil"><svg width="12" height="12" viewBox="0 0 12 12"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.5"/></svg></button>
+          <button class="sb-winbtn" id="grip-maximize" title="Perbesar"><svg width="12" height="12" viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7" fill="none" stroke="currentColor" stroke-width="1.3"/></svg></button>
+          <button class="sb-winbtn sb-winclose" id="grip-close" title="Tutup sesi"><svg width="12" height="12" viewBox="0 0 12 12"><line x1="2.5" y1="2.5" x2="9.5" y2="9.5" stroke="currentColor" stroke-width="1.5"/><line x1="9.5" y1="2.5" x2="2.5" y2="9.5" stroke="currentColor" stroke-width="1.5"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden legacy controls: their handlers stay bound at load; the nested Control Center triggers them. -->
+    <div id="legacy-controls" hidden aria-hidden="true">
+      <div class="sb-monitor-wrap" id="monitor-picker" style="display:none">
+        <button class="cc-tab" id="btn-monitor" title="Pindah monitor"><span id="monitor-label">Monitor 1</span></button>
+        <div class="monitor-menu hidden" id="monitor-menu"></div>
+      </div>
+      <button id="btn-quality"></button>
+      <button id="btn-audio" disabled></button>
+      <button id="btn-send-file"></button>
+      <button id="btn-chat"><span class="unread-dot hidden" id="chat-unread"></span></button>
+      <button id="btn-keys"></button>
+      <button id="btn-screenshot"></button>
+      <select id="scale-select">
+        <option value="fit">Pas jendela</option>
+        <option value="1">100%</option>
+        <option value="0.75">75%</option>
+        <option value="0.5">50%</option>
+        <option value="1.5">150%</option>
+        <option value="2">200%</option>
+      </select>
+      <button id="btn-viewonly"></button>
+      <button id="btn-blackscreen"></button>
+      <button id="btn-lock-input"></button>
+      <button id="btn-fullscreen"></button>
+    </div>
+
+    <!-- Full screen only (design direction C): a dock floating at the bottom centre instead of the session bar. It
+         shows for 4 s after entering full screen and whenever the pointer reaches the bottom edge. The small tab at
+         the top centre stays visible the whole time and opens the dock under it (user report 12 Nov: "tambahin
+         floating menu atau tombol exit": the dock alone was easy to miss). -->
+    <button class="fs-handle hidden" id="fs-handle" type="button" title="Menu sesi" aria-label="Menu sesi" aria-controls="fs-dock" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+    <div class="fs-dock hidden" id="fs-dock" role="toolbar" aria-label="Kontrol sesi">
+      <div class="fsd-stat"><span class="fsd-lat" id="fsd-lat"><b>-</b> <small>ms</small></span><span class="fsd-peer" id="fsd-peer"></span></div>
+      <button class="fsd-btn" id="fsd-keys" title="Kombinasi tombol"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span>Tombol</span></button>
+      <button class="fsd-btn" id="fsd-monitor" title="Pindah ke monitor berikutnya"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span id="fsd-monitor-label">Layar 1</span></button>
+      <button class="fsd-btn" id="fsd-menu" title="Control Center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg><span>Menu</span></button>
+      <button class="fsd-btn" id="fsd-file" title="Transfer file"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>File</span></button>
+      <button class="fsd-btn" id="fsd-chat" title="Chat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg><span>Chat</span></button>
+      <button class="fsd-btn" id="fsd-exit" title="Keluar dari layar penuh (Ctrl+Alt+Shift+Esc)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span data-i18n="fsd_exit">Keluar</span></button>
+      <button class="fsd-btn fsd-danger" id="fsd-disconnect" title="Putuskan"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Putuskan</span></button>
+    </div>
+
+    <div class="remote-stage" id="remote-stage">
+      <div class="remote-canvas-container fit" id="remote-canvas-container">
+        <!-- One <video class="remote-video"> per session is created here at runtime; the active one shows. -->
+        <div class="video-wrap" id="video-wrap"></div>
+      </div>
+
+      <!-- Loading state until first frame arrives -->
+      <div class="remote-loading hidden" id="remote-loading">
+        <div class="remote-loading-spinner"></div>
+        <div class="remote-loading-text">Memuat layar remote…</div>
+      </div>
+
+      <!-- Stats overlay -->
+      <div class="stats-overlay hidden" id="stats-overlay">
+        <!-- Concept: three numbers large on top (gambar, jeda, data), the details under them on hairlines. -->
+        <div class="stat-row stat-big"><span>gambar/detik</span><b id="stat-fps">-</b></div>
+        <div class="stat-row stat-big"><span>jeda</span><b id="stat-latency">-</b></div>
+        <div class="stat-row stat-big"><span>data</span><b id="stat-bitrate">-</b></div>
+        <div class="stat-row"><span>Paket hilang</span><b id="stat-loss">-</b></div>
+        <div class="stat-row"><span>Resolusi</span><b id="stat-res">-</b></div>
+        <div class="stat-row"><span>Jalur</span><b id="stat-route">-</b></div>
+        <div class="stat-row"><span>Codec</span><b id="stat-codec">-</b></div>
+      </div>
+
+      <!-- Quality panel (slide-in) -->
+      <div class="quality-panel hidden" id="quality-panel">
+        <div class="qp-header">
+          <button class="qp-back" id="btn-quality-back" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg><span>Control Center</span></button>
+          <h3>Kualitas <em>lanjutan.</em></h3>
+          <button class="settings-close" id="btn-quality-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="qp-body">
+          <div class="qp-group">
+            <label>Preset</label>
+            <div class="preset-grid">
+              <button class="preset-btn" data-preset="hemat">Hemat</button>
+              <button class="preset-btn" data-preset="seimbang">Seimbang</button>
+              <button class="preset-btn" data-preset="kualitas">Kualitas</button>
+              <button class="preset-btn" data-preset="ultra">Ultra</button>
+              <button class="preset-btn" data-preset="gaming">Gaming</button>
+              <button class="preset-btn" data-preset="maksimal">Maksimal</button>
+            </div>
+          </div>
+
+          <div class="qp-group">
+            <label>Kecepatan (bitrate)</label>
+            <div class="bitrate-row">
+              <input type="range" id="bitrate-slider" min="1" max="1000" value="20" class="slider">
+              <div class="bitrate-value">
+                <input type="number" id="bitrate-number" min="1" max="1000" value="20" class="num-input">
+                <span>Mbps</span>
+              </div>
+            </div>
+            <div class="setting-note">Geser 1–1000 Mbps. Nilai tinggi = gambar lebih tajam, butuh bandwidth besar. Di atas 300 Mbps hanya lewat jalur cepat UDP (Windows ke Windows, jaringan lokal).</div>
+          </div>
+
+          <div class="qp-group">
+            <label>Frame rate</label>
+            <div class="chip-row" id="fps-row">
+              <button class="chip" data-fps="30">30</button>
+              <button class="chip" data-fps="60">60</button>
+              <button class="chip" data-fps="120">120</button>
+              <button class="chip" data-fps="144">144</button>
+              <button class="chip" data-fps="165">165</button>
+              <button class="chip" data-fps="180">180</button>
+              <button class="chip" data-fps="240">240</button>
+            </div>
+          </div>
+
+          <div class="qp-group">
+            <label>Resolusi</label>
+            <div class="chip-row" id="res-row">
+              <button class="chip" data-scale="0">Asli</button>
+              <button class="chip" data-scale="1080">1080p</button>
+              <button class="chip" data-scale="720">720p</button>
+              <button class="chip" data-scale="480">480p</button>
+            </div>
+          </div>
+
+          <div class="qp-group">
+            <label>Codec video</label>
+            <select id="codec-select" class="select-input">
+              <option value="auto">Otomatis</option>
+              <option value="AV1">AV1 (paling hemat)</option>
+              <option value="VP9">VP9</option>
+              <option value="VP8">VP8</option>
+              <option value="H265">H.265 (lebih tajam)</option>
+              <option value="H264">H.264 (kompatibel)</option>
+            </select>
+            <div class="setting-note">Ganti codec menyambung ulang video sesaat.</div>
+          </div>
+
+          <div class="qp-group qp-toggle-row">
+            <label for="stats-toggle">Tampilkan statistik</label>
+            <label class="switch"><input type="checkbox" id="stats-toggle"><span class="switch-slider"></span></label>
+          </div>
+
+          <div class="qp-group qp-toggle-row">
+            <label for="clipboard-toggle">Sinkron clipboard</label>
+            <label class="switch"><input type="checkbox" id="clipboard-toggle" checked><span class="switch-slider"></span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- File Transfer (owner's final concept 16 Nov, "Pilihan 2 + Atas A"): two panes, each opened by a PC card (name, free
+       space, disk) and one path row; Nama / Diubah / Jenis / Ukuran; the bottom strip holds progress and every action.
+       Fills the window under the title bar. -->
+  <div class="overlay fm-overlay hidden" id="overlay-files" role="dialog" aria-label="File Transfer">
+    <div class="fmx" id="fmx">
+      <div class="fmx-grid">
+        <section class="fmx-pane" id="fm-local" data-side="local"></section>
+        <section class="fmx-pane" id="fm-remote" data-side="remote"></section>
+      </div>
+      <div class="fmx-strip" id="fm-strip">
+        <button class="fmx-ib" id="fm-close" type="button" title="Kembali ke layar remote" aria-label="Kembali ke layar remote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <span class="fmx-vr"></span>
+        <svg class="fmx-ring" id="fm-ring" viewBox="0 0 36 36" aria-hidden="true"><circle class="bgc" cx="18" cy="18" r="14" fill="none" stroke-width="4"/><circle class="fgc" cx="18" cy="18" r="14" fill="none" stroke-width="4" stroke-linecap="round" transform="rotate(-90 18 18)"/></svg>
+        <div class="fmx-st"><b><span class="fmx-gl" id="fm-st-long">Belum ada transfer berjalan</span><span class="fmx-gs" id="fm-st-short">Belum ada transfer</span></b><small id="fm-st-sub">Seret file ke panel lain, atau pilih lalu tekan Kirim</small></div>
+        <button class="fmx-ib" id="fm-pause-all" type="button" title="Jeda" aria-label="Jeda" disabled><svg class="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="3.6" height="14" rx="1"/><rect x="13.9" y="5" width="3.6" height="14" rx="1"/></svg><svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.8v14.4a1 1 0 0 0 1.5.86l12-7.2a1 1 0 0 0 0-1.72l-12-7.2A1 1 0 0 0 7 4.8z"/></svg></button>
+        <button class="fmx-b2 sm" id="fm-queue-btn" type="button"><span>Antrean</span><span class="fmx-qn" id="fm-queue-count"></span></button>
+        <span class="fmx-vr"></span>
+        <button class="fmx-b2" id="fm-recv-btn" type="button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span id="fm-recv-label">Unduh</span></button>
+        <button class="fmx-b2" id="fm-send-btn" type="button" disabled><span id="fm-send-label">Kirim</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+
+      <!-- Queue: a drawer from the right -->
+      <div class="fmx-scrim hidden" id="fm-scrim"></div>
+      <aside class="fmx-drawer hidden" id="fm-drawer" aria-label="Antrean transfer">
+        <div class="fmx-dh"><h3>Antrean <em>transfer.</em></h3><button class="fmx-ib" id="fm-drawer-close" type="button" title="Tutup" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+        <div class="fmx-dsum"><span id="fm-dsum"></span><div class="fmx-dbar"><i id="fm-dbar"></i></div></div>
+        <div class="fmx-qlist" id="fm-queue-list"></div>
+        <div class="fmx-dfoot"><button class="fmx-b2" id="fm-pause-all2" type="button"></button><button class="fmx-b2" id="fm-queue-clear" type="button">Bersihkan yang selesai</button></div>
+      </aside>
+
+      <!-- File sudah ada: a sheet from the bottom -->
+      <div class="fmx-sheet-wrap hidden" id="fm-dup">
+        <div class="fmx-sheet" role="alertdialog" aria-labelledby="fm-dup-title">
+          <h3 id="fm-dup-title"></h3>
+          <p class="fmx-dup-where" id="fm-dup-where"></p>
+          <div class="fmx-dup-cmp">
+            <div class="fmx-dup-card"><div class="fmx-dup-h"><span id="fm-dup-a-h"></span><span class="fmx-newer hidden" id="fm-dup-a-new">Lebih baru</span></div><dl id="fm-dup-a"></dl></div>
+            <div class="fmx-dup-card"><div class="fmx-dup-h"><span id="fm-dup-b-h"></span><span class="fmx-newer hidden" id="fm-dup-b-new">Lebih baru</span></div><dl id="fm-dup-b"></dl></div>
+          </div>
+          <div class="fmx-dup-opts" role="radiogroup">
+            <button type="button" class="fmx-opt" data-v="replace" role="radio">Ganti</button>
+            <button type="button" class="fmx-opt" data-v="keep" role="radio">Simpan keduanya</button>
+            <button type="button" class="fmx-opt" data-v="skip" role="radio">Lewati</button>
+          </div>
+          <label class="fmx-dup-all hidden" id="fm-dup-all-row"><input type="checkbox" id="fm-dup-all"><span id="fm-dup-all-label"></span></label>
+          <div class="fmx-dup-act"><button type="button" class="fmx-b2 lg" id="fm-dup-cancel">Batalkan transfer</button><button type="button" class="fmx-b1 lg" id="fm-dup-ok">Lanjutkan</button></div>
+        </div>
+      </div>
+
+      <div class="fmx-menu hidden" id="fm-drive-menu" role="menu"></div>
+      <div class="fmx-ghost" id="fm-ghost" aria-hidden="true"><span class="fmx-gi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg><em id="fm-ghost-n">1</em></span><span class="fmx-gt"><b id="fm-ghost-name"></b><small id="fm-ghost-sub"></small></span></div>
+    </div>
+  </div>
+
+  <!-- File transfer stack (over any screen) -->
+  <div class="transfer-stack" id="transfer-stack"></div>
+
+  <!-- Key combinations: Arah B "Panel" (owner pick 19 Nov). A wide panel on the right like the chat, open until closed,
+       tiles in groups (filled by app.js), search, the Hold keys, own combinations, and a short list on the lock screen.
+       Ctrl+Alt+Del comes from the TryDesk Windows service on the other PC (SendSAS); Windows ignores it from a program. -->
+  <div class="keys-panel hidden" id="keys-panel" role="dialog" aria-labelledby="keys-with">
+    <div class="kp-head">
+      <button class="settings-close kp-close" id="btn-keys-close" type="button" title="Tutup" aria-label="Tutup"><svg class="cx-x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><svg class="cx-back" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <span class="kp-kick">Kombinasi tombol</span>
+      <h3 id="keys-with"></h3>
+      <div class="kp-search" id="keys-search-row">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input type="text" id="keys-search" placeholder="Cari, misalnya task atau win r" aria-label="Cari kombinasi tombol" autocomplete="off" spellcheck="false">
+        <button class="kp-clear hidden" id="keys-search-clear" type="button" aria-label="Hapus pencarian"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="kp-hold" id="keys-hold" role="group" aria-label="Tahan tombol"><span>Tahan</span><button class="kp-chip" type="button" data-vk="17" aria-pressed="false">Ctrl</button><button class="kp-chip" type="button" data-vk="18" aria-pressed="false">Alt</button><button class="kp-chip" type="button" data-vk="16" aria-pressed="false">Shift</button><button class="kp-chip" type="button" data-vk="91" aria-pressed="false">Win</button></div>
+      <p class="kp-hint hidden" id="keys-hint" role="status"></p>
+    </div>
+    <div class="kp-body" id="keys-body"></div>
+    <div class="kp-foot" id="keys-foot"><button class="btn-secondary" id="btn-keys-new" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Buat kombinasi sendiri</button></div>
+    <div class="kp-rec hidden" id="keys-rec">
+      <div class="kp-rec-top"><b>Kombinasi baru</b><button class="kp-x" id="btn-keys-rec-close" type="button" aria-label="Batal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div class="kp-pad" id="keys-rec-pad" tabindex="0" role="textbox" aria-label="Tekan tombolnya di keyboard Anda"><span class="kp-pad-hint">Tekan tombolnya di keyboard Anda</span></div>
+      <label class="kp-lbl" for="keys-rec-name">Nama</label>
+      <input type="text" id="keys-rec-name" class="input-field" maxlength="40" placeholder="Misalnya Buka tab tertutup" autocomplete="off">
+      <div class="kp-lbl">Tombol yang tidak ada di keyboard Anda</div>
+      <div class="kp-add" id="keys-rec-add"><button type="button" data-vk="91">Win</button><button type="button" data-vk="44">PrtSc</button><button type="button" data-vk="46">Del</button><button type="button" data-vk="27">Esc</button><button type="button" data-vk="9">Tab</button><button type="button" data-vk="123">F12</button></div>
+      <p class="kp-note">Disimpan di perangkat ini saja.</p>
+      <div class="kp-acts"><button class="btn-secondary" id="btn-keys-rec-again" type="button">Rekam ulang</button><button class="btn-apply" id="btn-keys-rec-save" type="button" disabled>Simpan</button></div>
+    </div>
+  </div>
+
+  <!-- Chat panel. Arah 3 (owner pick 15 Nov): a wide panel on the right, the other person's name large, the time
+       under each group of messages, and the typing box of Arah 1 (a round field with the send button inside). -->
+  <div class="chat-panel hidden" id="chat-panel" role="dialog" aria-labelledby="chat-with">
+    <div class="chat-head">
+      <button class="settings-close chat-close" id="btn-chat-close" type="button" title="Tutup" aria-label="Tutup"><svg class="cx-x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><svg class="cx-back" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <span class="chat-kick" id="chat-kick">Chat</span>
+      <h3 id="chat-with"></h3>
+    </div>
+    <div class="chat-messages" id="chat-messages" role="log" aria-live="polite"></div>
+    <div class="chat-drop" id="chat-drop" aria-hidden="true"><span>Lepas untuk mengirim di chat</span></div>
+    <div class="chat-input-row">
+      <div class="chat-field">
+        <!-- 17 Nov: a picture or file in the chat (also by dropping it on the chat or pasting it in the box) -->
+        <button class="chat-attach" id="btn-chat-attach" type="button" title="Kirim gambar atau file" aria-label="Kirim gambar atau file"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.1l-8.5 8.5a5.5 5.5 0 0 1-7.8-7.8l8.5-8.5a3.7 3.7 0 0 1 5.2 5.2l-8.5 8.5a1.8 1.8 0 0 1-2.6-2.6l7.8-7.8"/></svg></button>
+        <input type="file" id="chat-file-pick" multiple hidden>
+        <input type="text" id="chat-input" class="input-field" placeholder="Ketik pesan" autocomplete="off" aria-label="Ketik pesan">
+        <button class="chat-send" id="btn-chat-send" type="button" title="Kirim" aria-label="Kirim"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Way back to sessions still running while Home / Connecting is shown ("＋", a tile double-click…) -->
+  <button class="back-pill hidden" id="back-to-session">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    <span class="bp-text"></span><span class="bp-go">Kembali ke sesi</span>
+  </button>
+
+  <script src="app.js"></script>
+</body>
+</html>

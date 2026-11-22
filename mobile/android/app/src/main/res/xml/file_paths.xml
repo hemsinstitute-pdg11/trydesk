@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Capacitor template default shared the whole external storage; TryDesk shares nothing through this provider
+     but the two below: the app's own cache, and the verified update APK handed to Android's installer
+     (TdUpdatePlugin, files/update/). -->
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <cache-path name="my_cache_images" path="." />
+    <files-path name="update" path="update/" />
+</paths>

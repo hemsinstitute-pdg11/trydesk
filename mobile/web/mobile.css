@@ -1,0 +1,651 @@
+/* TryDesk for Android — phone layout layered over the desktop style.css (same tokens, same components).
+   Everything is scoped to html.td-mobile, which mobile.js sets. */
+
+/* System-bar insets. The page is drawn edge-to-edge (viewport-fit=cover): on WebView 140+ Capacitor passes the
+   real insets through, so the status bar sits ON TOP of the page unless we leave room for it. Older WebViews get
+   a padded view and report 0 here. --safe-area-inset-* is Capacitor's injected copy, for WebViews whose env()
+   is unreliable. */
+html.td-mobile {
+  --sat: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+  --sab: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
+  --sal: max(env(safe-area-inset-left, 0px), var(--safe-area-inset-left, 0px));
+  --sar: max(env(safe-area-inset-right, 0px), var(--safe-area-inset-right, 0px));
+}
+html.td-mobile, html.td-mobile body { height: 100%; }
+html.td-mobile body { height: 100dvh; padding-left: var(--sal); padding-right: var(--sar);
+  -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: manipulation; }
+html.td-mobile .m-hide { display: none !important; }
+
+/* ─── Title bar: no window controls on a phone; starts below the status bar ─── */
+/* Top bar: the website's brand mark (white monitor in a red rounded square) + wordmark on the left; the connection
+   state as a short label and the settings button on the right. It replaces the desktop-style status bar at the
+   bottom, which a phone doesn't need. */
+html.td-mobile .titlebar { height: calc(56px + var(--sat)); padding-top: var(--sat); padding-right: 8px; background: var(--bg-primary); }
+html.td-mobile .titlebar-drag { padding-left: 16px; }
+html.td-mobile .titlebar-logo { font-size: 17px; font-weight: 700; letter-spacing: -0.2px; gap: 10px; }
+html.td-mobile .titlebar-logo svg { box-sizing: content-box; width: 18px; height: 18px; padding: 7px; border-radius: 9px; background: var(--accent); color: #fff; }
+html.td-mobile .titlebar-buttons { align-items: center; gap: 4px; }
+html.td-mobile .m-status { display: inline-flex; align-items: center; gap: 7px; height: 44px; padding: 0 8px; border: 0; border-radius: 8px; background: none; color: var(--text-secondary); font-family: inherit; font-size: 12.5px; font-weight: 600; line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent; }   /* plain label + dot (direction A: no capsule) */
+html.td-mobile .m-status .status-dot { width: 7px; height: 7px; }
+html.td-mobile .status-bar { display: none; }
+html.td-mobile #btn-minimize, html.td-mobile #btn-maximize, html.td-mobile #btn-close { display: none; }
+html.td-mobile #btn-settings { display: none; }   /* Pengaturan lives in the bottom tab bar */
+html.td-mobile .m-status { margin-right: 8px; }
+
+/* ─── Bottom tab bar, design direction A: a flat bar on the page edge ─── */
+/* No floating capsule or shadow: one hairline on top, the page colour, and the current tab marked by a short red
+   line above it plus its label in bold (a real state). Clear of the gesture bar (safe-area inset). */
+.m-tabbar { display: none; }
+html.td-mobile .m-tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; display: flex; padding: 0 var(--sar) var(--sab) var(--sal); background: var(--bg-primary); border-top: 1px solid var(--border); }
+html.td-mobile .m-tabbar.hidden { display: none; }
+html.td-mobile .m-tab { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 62px; border: none; background: transparent; color: var(--text-secondary); font-family: inherit; font-size: 11.5px; font-weight: 500; line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: color 0.115s; }
+html.td-mobile .m-tab svg { width: 21px; height: 21px; }
+html.td-mobile .m-tab.active { color: var(--text-primary); font-weight: 700; }
+html.td-mobile .m-tab.active::before { content: ""; position: absolute; top: -1px; left: 32%; right: 32%; height: 2px; background: var(--accent); }
+html.td-mobile .m-tab:active { background: var(--bg-hover); }
+/* Home shows one card per tab; everything scrolls clear of the bar. */
+html.td-mobile[data-mtab="connect"] .hcard-sessions { display: none; }
+html.td-mobile[data-mtab="devices"] .home-top { display: none; }
+
+/* ─── Home: one column, connect first ─── */
+/* The phone is a viewer: no "Desktop Ini" card. The connect card leads (its own heading replaces the card head),
+   the sessions card follows with full-width tabs and search. The bottom padding keeps the last tiles clear of the
+   floating tab bar (it used to sit in a separate rule that this shorthand overrode: tiles went under the bar). */
+html.td-mobile .home { padding: 16px 14px calc(96px + var(--sab)); gap: 14px; }
+html.td-mobile .home-top { grid-template-columns: 1fr; gap: 14px; }
+html.td-mobile .panel-left { display: none; }
+html.td-mobile .hcard-body { padding: 18px 16px 18px; }
+/* Connect, design direction A: no card, the stage sentence large ("Masukkan ID, lalu Hubungkan."), the ID field,
+   then the number pad (from direction C), password, Hubungkan. Words rise in on the 130 bpm grid (115 ms apart). */
+html.td-mobile .hcard-remote { background: none; border: 0; border-radius: 0; }
+html.td-mobile .hcard-remote > .hcard-body { padding: 6px 4px 8px; }
+html.td-mobile .stage-title { display: block; min-height: 0; padding: 8px 4px 0; border: 0; color: var(--text-primary); font-size: 34px; font-weight: 800; line-height: 1.04; letter-spacing: -0.035em; text-transform: none; }
+html.td-mobile .stage-title em { font-style: normal; color: var(--accent); }
+html.td-mobile .stage-title .w { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+html.td-mobile .stage-title .w > * { display: inline-block; animation: stage-rise 0.46s var(--ease) both; }
+html.td-mobile .stage-title .w:nth-of-type(2) > * { animation-delay: 0.115s; }
+html.td-mobile .stage-title .w:nth-of-type(3) > * { animation-delay: 0.23s; }
+html.td-mobile .m-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+/* Digits, and the PC's own keys (Esc … F12, the arrows), keep their left-to-right order in Arabic too: an RTL page
+   mirrored the pad to "3 2 1" and swapped the arrow keys (audit 17 Nov). */
+html.td-mobile .m-keypad, html.td-mobile #m-keys { direction: ltr; }
+html.td-mobile .m-pad-key { height: 52px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); font-family: inherit; font-size: 24px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: background 0.115s; }
+html.td-mobile .m-pad-key:active { background: var(--bg-hover); }
+html.td-mobile .m-pad-key[data-k="del"] { color: var(--text-secondary); }
+html.td-mobile .m-page-title { display: none; }
+html.td-mobile[data-mtab="devices"] .m-page-title { display: block; margin: 4px 0 14px; font-size: 34px; font-weight: 800; line-height: 1.04; letter-spacing: -0.035em; color: var(--text-primary); }
+@media (prefers-reduced-motion: reduce) { html.td-mobile .stage-title .w > * { animation: none; } }
+html.td-mobile #btn-connect-files { display: none; }
+html.td-mobile .link-btn { font-size: 13.5px; padding: 8px 0; }
+html.td-mobile .sess-head { padding: 10px 12px; }
+html.td-mobile .sess-tabs { flex: 1; }
+html.td-mobile .sess-tab { flex: 1; justify-content: center; height: 38px; font-size: 14px; }
+html.td-mobile .recent-head-actions { width: 100%; margin-left: 0; flex-wrap: wrap; justify-content: space-between; row-gap: 8px; }
+html.td-mobile .sess-search { flex: 1 1 100%; }
+html.td-mobile .sess-search input { width: 100%; height: 38px; font-size: 16px; }
+/* Same grid / list switch as on the desktop, sized for a thumb, on one row with sort; "Hapus semua" at the end. */
+html.td-mobile .recent-head-actions { justify-content: flex-start; column-gap: 8px; }
+html.td-mobile .view-btn { width: 44px; height: 36px; }
+html.td-mobile .recent-clear { margin-left: auto; }
+html.td-mobile .recent-sort, html.td-mobile .recent-clear { height: 38px; }
+html.td-mobile .hcard-sessions .recent-section { padding: 12px; }
+/* Devices tab: the list is the page itself. A card around the tiles (which are cards too) was a box in a box. */
+html.td-mobile[data-mtab="devices"] .hcard-sessions { background: transparent; border: 0; border-radius: 0; }
+html.td-mobile[data-mtab="devices"] .sess-head { padding: 0 0 12px; }
+html.td-mobile[data-mtab="devices"] .hcard-sessions .recent-section { padding: 12px 0 0; }
+html.td-mobile .help-panel { width: 100%; max-width: none; max-height: none; height: 100%; border: 0; border-radius: 0; padding-top: var(--sat); }
+html.td-mobile #overlay-lan-help { align-items: stretch; background: var(--bg-primary); backdrop-filter: none; padding: 0; }
+html.td-mobile .help-body li, html.td-mobile .help-body p { font-size: 14.5px; }
+html.td-mobile .m-lead { font-size: 14px; font-weight: 400; line-height: 1.45; color: var(--text-secondary); margin: 2px 0 16px; }
+/* The sentence above says what the field is; the label stays for screen readers (for="remote-id"). */
+html.td-mobile .connect-section label { display: block; position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+html.td-mobile .input-field { font-size: 16px; padding: 14px 15px; border-radius: 12px; }   /* 16px stops the WebView zooming on focus */
+html.td-mobile .pw-field > .input-field { padding-right: 52px; }
+/* Password akses card (Kartu kunci, 15 Nov): thumb-sized buttons and field on the phone */
+html.td-mobile #access-pw-card .lk-acts button { height: 44px; min-height: 44px; flex: 1 1 auto; font-size: 14px; }
+html.td-mobile #access-pw-card .pw-field > .input-field, html.td-mobile #access-pw-card .lk-dots { height: 44px; min-height: 44px; font-size: 14px; }
+html.td-mobile #access-pw-card .lk-svc { flex-wrap: wrap; }
+html.td-mobile #access-pw-card .lk-svc .btn-secondary { width: 100%; height: 44px; }
+html.td-mobile .pw-eye { width: 50px; border-radius: 0 12px 12px 0; }   /* a thumb-sized target */
+html.td-mobile .input-id { font-size: 24px; padding: 16px; letter-spacing: 3px; }
+html.td-mobile .btn-connect { padding: 16px; border-radius: 13px; font-size: 16px; }
+html.td-mobile .btn-connect:hover { transform: none; box-shadow: none; }
+html.td-mobile .m-foot { font-size: 12.5px; line-height: 1.5; color: var(--text-muted); margin-top: 6px; }
+html.td-mobile .recent-grid:not(.view-list) { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+html.td-mobile .recent-head { flex-wrap: wrap; row-gap: 8px; }
+/* As on the desktop, the star on a grid tile only shows for a favorite (a star on every tile was clutter); the
+   tile's ⋮ menu adds and removes favorites. In the list it stays visible, a tap target in the row. */
+html.td-mobile .fav-star.tile-star { width: 32px; height: 32px; }
+html.td-mobile .recent-grid:not(.view-list) .recent-tile:hover .fav-star.tile-star:not(.active) { opacity: 0; }   /* a tap leaves :hover stuck */
+html.td-mobile .view-list .recent-tile { min-height: 58px; padding: 8px 6px 8px 10px; }
+html.td-mobile .view-list .tile-preview { width: 64px; height: 38px; }
+html.td-mobile .view-list .tile-meta { flex-direction: column; align-items: flex-start; gap: 2px; }
+html.td-mobile .view-list .tile-id { font-size: 15px; }
+html.td-mobile .view-list .tile-sub { font-size: 12px; }
+html.td-mobile .tile-more { width: 36px; height: 36px; color: var(--text-secondary); }
+html.td-mobile .recent-tile { -webkit-touch-callout: none; user-select: none; }
+html.td-mobile .recent-tile:hover { transform: none; box-shadow: none; border-color: var(--border); background: var(--bg-secondary); }
+/* Tile menu = bottom sheet */
+html.td-mobile .tile-menu { left: 0; right: 0; margin: 0 auto; width: min(440px, calc(100vw - 20px)); max-width: none; top: auto;
+  bottom: calc(12px + var(--sab)); border-radius: 16px; padding: 8px; transform-origin: bottom center; animation: m-sheet 0.23s var(--ease);
+  box-shadow: 0 18px 60px rgba(0,0,0,0.6); }
+html.td-mobile .tile-menu .cc-item { min-height: 48px; padding: 0 14px; gap: 14px; font-size: 15px; }
+html.td-mobile .tile-menu .cc-item svg { width: 18px; height: 18px; }
+html.td-mobile .tile-menu-head { padding: 8px 14px 10px; font-size: 12.5px; }
+/* Sheet head (concept): the PC's picture, name, ID; the page behind dims so the sheet is the one thing to answer. */
+html.td-mobile .tile-menu-head.tile-menu-card { display: flex; align-items: center; gap: 12px; padding: 8px 10px 12px; margin-bottom: 4px; border-bottom: 1px solid var(--border); }
+html.td-mobile .tile-menu-card .tmc-pic { width: 66px; height: 38px; flex: none; margin: 0; border-radius: 6px; overflow: hidden; }
+html.td-mobile .tile-menu-card .tmc-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+html.td-mobile .tile-menu-card b { font-size: 15px; font-weight: 700; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html.td-mobile .tile-menu-card span { font-size: 13px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+html.td-mobile .m-ask-q { margin: 4px 14px 10px; font-size: 15px; font-weight: 600; color: var(--text-primary); }
+html.td-mobile .tile-scrim { position: fixed; inset: 0; z-index: 139; background: rgba(0, 0, 0, 0.55); animation: m-scrim 0.23s var(--ease); }
+@keyframes m-scrim { from { opacity: 0; } to { opacity: 1; } }
+
+
+/* ─── Settings: full-screen sheet ─── */
+html.td-mobile #overlay-settings { align-items: stretch; justify-content: stretch; background: var(--bg-primary); backdrop-filter: none;
+  padding: var(--sat) var(--sar) 0 var(--sal); }
+html.td-mobile .settings-panel { width: 100%; max-width: none; max-height: none; height: 100%; border: 0; border-radius: 0; box-shadow: none; animation: none; }
+html.td-mobile .settings-header { padding-top: 14px; padding-bottom: 14px; }
+html.td-mobile .settings-body { padding: 0 18px calc(100px + var(--sab)); }   /* clear of the floating tab bar */
+/* The LAN help shares the .settings-body class but has no tab bar under it (mobile.js hides the bar), so it gets its
+   own spacing: room above the text, and the "Mengerti" button just clear of the gesture bar. */
+html.td-mobile .help-body { padding: 16px 18px calc(20px + var(--sab)); }
+html.td-mobile .settings-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -18px 18px; padding: 12px 18px; }
+html.td-mobile .settings-tabs::-webkit-scrollbar { display: none; }
+html.td-mobile .stab { flex: 1 0 auto; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 6px 10px; font-size: 13px; }   /* icon above the label: the five tabs still fit one row, in English too */
+@media (max-width: 380px) { html.td-mobile .settings-tabs { padding: 12px 12px; } html.td-mobile .stab { padding: 10px 3px; font-size: 12.5px; } }
+html.td-mobile .select-input { font-size: 15px; padding-top: 12px; padding-bottom: 12px; }
+/* Settings, direction A (as on the desktop): each tab opens with its sentence, groups sit under hairlines instead
+   of in boxes, group titles in sentence case, the current tab in bold with a short red line under it. */
+html.td-mobile #overlay-settings .settings-header h3 { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; }
+html.td-mobile #overlay-settings .stab.active { color: var(--text-primary); background: none; font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); border-radius: 0; }
+html.td-mobile #overlay-settings .tab-lead { display: block; margin: 2px 0 10px; font-size: 26px; font-weight: 800; line-height: 1.05; letter-spacing: -0.035em; color: var(--text-primary); }
+html.td-mobile #overlay-settings .tab-lead em { font-style: normal; color: var(--accent); }
+html.td-mobile #overlay-settings .settings-tab-content { gap: 0; }
+html.td-mobile #overlay-settings .setting-group { padding: 16px 0; background: none; border: 0; border-top: 1px solid var(--border); border-radius: 0; }
+html.td-mobile #overlay-settings .setting-group > label { font-size: 14px; font-weight: 600; color: var(--text-primary); text-transform: none; letter-spacing: 0; }
+html.td-mobile #overlay-settings .setting-note { font-size: 12.5px; }
+html.td-mobile .setting-row-toggle { gap: 14px; }
+
+/* ─── Connecting ─── */
+html.td-mobile .connecting-container { padding: 28px 22px; text-align: center; }
+html.td-mobile .btn-cancel { padding: 13px 30px; font-size: 15px; }
+/* Password: a page, not a floating card. It starts at the top, so the keyboard never covers the field or the
+   button, and the button is full width for the thumb. */
+/* Password page as drawn: no app bar, everything in the middle of the screen (the keyboard shrinks the view, so the
+   field stays above it). */
+html.td-mobile .connecting-container:has(.connect-pw:not(.hidden)) { justify-content: center; padding: calc(20px + var(--sat)) 16px 20px; gap: 6px; min-height: 100%; }
+html.td-mobile body:has(#screen-connecting:not(.hidden) .connect-pw:not(.hidden)) .titlebar { display: none; }
+html.td-mobile .connect-pw { max-width: none; padding: 4px 2px 0; background: none; border: 0; border-radius: 0; }
+html.td-mobile .cpw-peer .tile-preview { width: 88px; height: 50px; }
+html.td-mobile .cpw-peer-name { font-size: 17px; }
+html.td-mobile .cpw-peer-id { font-size: 13.5px; }
+html.td-mobile .cpw-title { font-size: 26px; }   /* the sentence "PC ini meminta password." (direction A) */
+html.td-mobile #overlay-lan-help .settings-header h3 { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; }
+html.td-mobile .connecting-container .cpw-wait { font-size: 13.5px; }
+
+/* ─── Remote: the picture takes the whole screen; controls float on top ─── */
+html.td-mobile .remote-tabs { display: none; }
+/* The session bar stays in the DOM (the Control Center lives inside it) but takes no space. */
+html.td-mobile .session-bar { height: 0; min-height: 0; padding: 0; border: 0; box-shadow: none; overflow: visible; background: none; }
+html.td-mobile .session-bar .sb-left, html.td-mobile .session-bar .sb-btn, html.td-mobile .session-bar .sb-divider,
+html.td-mobile .session-bar .sb-wincontrols, html.td-mobile .session-bar .cc-btn { display: none; }
+html.td-mobile #remote-canvas-container { touch-action: none; }
+/* Keep the picture out from under the status bar and the gesture bar (landscape on WebView 140+): a tap there
+   belongs to Android, so the PC's top-right window buttons and its taskbar could not be reached. */
+html.td-mobile #remote-canvas-container { top: var(--sat); bottom: var(--sab); }
+html.td-mobile .remote-canvas-container.fit .video-wrap { will-change: transform; }
+html.td-mobile .stats-overlay { top: calc(10px + var(--sat)); bottom: auto; left: 10px; min-width: 150px; padding: 8px 11px; font-size: 10.5px; }
+html.td-mobile #game-banner { display: none !important; }
+
+/* Click point in touchpad mode */
+#m-cursor { position: absolute; left: 0; top: 0; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%;
+  border: 2px solid #fff; background: rgba(228, 49, 43, 0.28); box-shadow: 0 0 0 1px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.45);
+  pointer-events: none; z-index: 14; display: none; }
+
+/* Game mode: two hold-able mouse buttons on the right edge, above the toolbar — a thumb's reach in landscape. */
+#m-gamepad { position: absolute; right: calc(16px + var(--sar)); bottom: calc(84px + var(--sab)); z-index: 30; display: flex; gap: 12px; }
+#m-gamepad.hidden { display: none; }
+.m-gbtn { width: 64px; height: 64px; border-radius: 10px; border: 1px solid #2a2b30; background: #17181b;   /* direction A: solid, like the dock */
+  color: #f2f2f4; font-family: inherit; font-size: 18px; font-weight: 700; line-height: 1; touch-action: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+.m-gbtn.on { background: #d92b25; border-color: #d92b25; }
+
+/* Session dock, design direction C: one solid panel (no frosted glass). Landscape: one row = latency + PC name,
+   six labelled actions, Putuskan as the red end, then the hide button. Portrait: name row on top (with hide), the
+   six actions across the width, Putuskan as a full-width red bar at the bottom. */
+#m-toolbar { position: fixed; left: 50%; bottom: calc(12px + var(--sab)); transform: translateX(-50%);
+  display: flex; align-items: stretch; z-index: 45; overflow: hidden;
+  background: #17181b; border: 1px solid #2a2b30; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.45); }
+.m-dock-head { display: flex; align-items: center; gap: 4px; padding: 0 4px 0 10px; border-right: 1px solid #2a2b30; min-width: 0; }
+.m-peer { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; color: #a3a4aa; }
+.m-dock-row { display: flex; }
+.m-tb { position: relative; width: 58px; min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  border: 0; border-radius: 0; background: transparent; color: #d9dade; cursor: pointer; font-family: inherit; transition: background 0.115s, color 0.115s; }
+.m-tb-l { font-size: 10.5px; font-weight: 500; line-height: 1; color: #a3a4aa; }
+.m-tb:active { background: rgba(255,255,255,0.10); }
+.m-tb.on { color: #f0524b; }
+.m-tb.on .m-tb-l { color: #f0524b; font-weight: 700; }
+.m-tb.on::after { content: ""; position: absolute; left: 30%; right: 30%; bottom: 0; height: 2px; background: #e4312b; }   /* a real on/off state */
+#m-btn-close { width: 84px; background: #d92b25; color: #fff; }
+#m-btn-close .m-tb-l { color: #fff; font-weight: 700; }
+#m-btn-close:active { background: #e4312b; }
+#m-btn-hide { width: 34px; min-height: 0; color: #8e9097; }
+.m-lat { display: flex; align-items: center; gap: 6px; padding: 0 4px 0 0; font-size: 11.5px; font-weight: 500; color: #a3a5ab; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.m-lat b { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; color: #e8e8ea; }
+.m-lat small { font-size: 10.5px; font-weight: 700; color: #f0524b; margin-left: -4px; }
+.m-lat::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #5f6068; }
+.m-lat.lat-good::before { background: #22c55e; }
+.m-lat.lat-ok::before { background: #f59e0b; }
+.m-lat.lat-bad::before { background: #ef4444; }
+/* Landscape (owner, 7 Nov): the dock is actions only, no latency and no PC name; the hide arrow sits at the far right
+   after Putuskan, as the concept draws it. */
+@media (orientation: landscape) {
+  .m-dock-head { order: 3; padding: 0; border-right: 0; border-left: 1px solid #2a2b30; }
+  .m-dock-head .m-lat, .m-dock-head .m-peer { display: none; }
+  #m-btn-close { order: 2; }
+  /* "Keyboard" (the longest label, ~46 px) sat against the dock's rounded left corner (owner, 7 Nov): 6 px inside
+     the dock's left edge and 64 px per action give every label room. */
+  .m-dock-row { padding-left: 6px; }
+  .m-tb { width: 64px; }
+}
+/* Portrait: the one-row dock is wider than a phone (it used to be cut off at both ends, user report), so it stacks
+   into three rows across the width, 10 px from each edge. The keys bar and game buttons move above it. */
+@media (orientation: portrait) and (max-width: 600px) {
+  #m-toolbar { left: 10px; right: 10px; transform: none; flex-direction: column; }
+  .m-dock-head { height: 40px; border-right: 0; border-bottom: 1px solid #2a2b30; padding: 0 2px 0 12px; }
+  .m-peer { flex: 1; max-width: none; }
+  .m-dock-row .m-tb { flex: 1; width: auto; }
+  #m-btn-close { width: 100%; min-height: 46px; flex-direction: row; gap: 8px; }
+  #m-btn-close .m-tb-l { font-size: 14px; }
+  /* html-prefixed: the base #m-keys / #m-gamepad rules come later in this file and would win otherwise (the keys bar
+     sat behind the dock, found in the 6 Nov screen inventory). */
+  html #m-keys { bottom: calc(170px + var(--sab)); }
+  html #m-gamepad { bottom: calc(180px + var(--sab)); }
+}
+#m-peek { position: fixed; left: 50%; bottom: calc(8px + var(--sab)); transform: translateX(-50%); z-index: 45;
+  width: 52px; height: 26px; border: 1px solid rgba(255,255,255,0.10); border-radius: 13px; background: rgba(20,21,24,0.72);
+  color: #c9cbd0; display: flex; align-items: center; justify-content: center; }
+
+/* Special-keys bar */
+#m-keys { position: fixed; left: 8px; right: 8px; bottom: calc(68px + var(--sab)); z-index: 45;
+  display: flex; gap: 6px; padding: 6px; overflow-x: auto; scrollbar-width: none;
+  background: #17181b; border: 1px solid #2a2b30; border-radius: 10px; }
+#m-keys::-webkit-scrollbar { display: none; }
+.m-key { flex: none; min-width: 46px; height: 38px; padding: 0 11px; border: 1px solid rgba(255,255,255,0.09); border-radius: 9px;
+  background: rgba(255,255,255,0.05); color: #e8e8ea; font: 600 13px/1 'Inter', sans-serif; }
+.m-key:active { background: rgba(255,255,255,0.14); }
+.m-key.m-mod { color: #c7c9ce; }
+.m-key.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* Hidden input that raises the phone keyboard */
+#m-kbd { position: fixed; left: 0; bottom: 0; width: 1px; height: 1px; padding: 0; border: 0; opacity: 0; resize: none; font-size: 16px; z-index: -1; }
+
+/* Control Center, sub-menus and the key-combo menu become bottom sheets above the toolbar */
+html.td-mobile .control-center, html.td-mobile .cc-flyout {
+  left: 0 !important; right: 0; margin: 0 auto; width: min(440px, calc(100vw - 20px)); top: auto !important; bottom: calc(70px + var(--sab));
+  min-width: 0; max-width: none; max-height: 62dvh; overflow-y: auto; border-radius: 16px; padding: 8px;
+  transform-origin: bottom center; animation: m-sheet 0.23s var(--ease); }
+html.td-mobile .cc-flyout { z-index: 62; }
+@keyframes m-sheet { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  html.td-mobile .control-center, html.td-mobile .cc-flyout, html.td-mobile .tile-menu, html.td-mobile .tile-scrim { animation: none; }
+  html.td-mobile .m-tab:active { transform: none; }
+}
+html.td-mobile .cc-cat, html.td-mobile .cc-leaf { padding: 13px 14px; font-size: 14.5px; }
+html.td-mobile .cc-leaf.m-back { color: var(--text-secondary); font-weight: 600; border-bottom: 1px solid var(--border); border-radius: 8px 8px 0 0; margin-bottom: 4px; }
+html.td-mobile .cc-flyout-slider { padding: 12px 14px; }
+html.td-mobile .cc-flyout-slider input[type="range"] { height: 28px; }
+
+/* Panels opened from the Control Center */
+html.td-mobile .quality-panel { width: 100%; border-left: 0; z-index: 50; }
+html.td-mobile .chat-panel { width: 100%; border-right: 0; padding: var(--sat) var(--sar) 0 var(--sal); }
+html.td-mobile .chat-input-row { padding-bottom: calc(12px + var(--sab)); }
+
+/* Recording badge: below the status bar / notch, clear of the stats box on the left */
+html.td-mobile #rec-indicator { top: calc(10px + var(--sat)); right: calc(12px + var(--sar)); }
+
+/* "Kembali ke sesi" on Home sits above the floating tab bar */
+html.td-mobile .back-pill { bottom: calc(92px + var(--sab)); white-space: nowrap; max-width: calc(100vw - 32px); }
+html.td-mobile .back-pill .bp-go { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* While it shows, the page can scroll its last rows (keypad, Hubungkan) up above it instead of under it. */
+html.td-mobile:has(#back-to-session:not(.hidden)) .home { padding-bottom: calc(150px + var(--sab)); }
+
+/* Toasts sit above the toolbar */
+html.td-mobile .toast { bottom: calc(80px + var(--sab)); max-width: calc(100vw - 28px); text-align: center; line-height: 1.45; }
+html.td-mobile:has(.m-tabbar:not(.hidden)) .toast { bottom: calc(92px + var(--sab)); }   /* above the floating tab bar */
+/* In a session: above the dock (and the keys bar when it is open), whose height mobile.js measures; the portrait dock
+   is three rows, and a toast at 80 px covered its buttons (audit 17 Nov). */
+html.td-mobile.m-dock-toast .toast { bottom: calc(var(--m-dock-space) + 10px); }
+
+/* Complete concept (approved 6 Nov): Perangkat = title, Semua/Favorit segment, then search + grid/list/⋮ on one
+   row; the session menu keeps the phone's own dock, so its desktop-only buttons are left out. */
+html.td-mobile .recent-head-actions { flex-wrap: nowrap; column-gap: 4px; }
+html.td-mobile .sess-search { flex: 1 1 auto; min-width: 0; }
+html.td-mobile .view-btn { width: 40px; height: 38px; }
+html.td-mobile .control-center.cc-panel .ccp-tiles, html.td-mobile .control-center.cc-panel .ccp-more { display: none; }
+/* Above the three-row dock (as the key bar, #m-keys), centred with a margin on both sides. */
+html.td-mobile .control-center.cc-panel { width: min(440px, calc(100vw - 20px)); bottom: calc(160px + var(--sab)); max-height: calc(100dvh - 200px - var(--sab)); padding: 14px 16px; }
+html.td-mobile .control-center.cc-panel > .cc-leaf { margin-top: 8px; }
+/* A phone held sideways has a one-row dock: the panel and its sub-pages start just above it and take the height the
+   screen has (with the portrait numbers they were ~190 px tall, about two rows, audit 17 Nov). */
+@media (orientation: landscape) and (max-height: 560px) {
+  /* dock: 12 px from the bottom + 58 px tall (one row of 56 px actions); the panel keeps 10 px above it */
+  html.td-mobile .control-center.cc-panel, html.td-mobile .cc-flyout { bottom: calc(80px + var(--sab)); max-height: calc(100dvh - 92px - var(--sat) - var(--sab)); }
+}
+/* Hubungkan as drawn in the complete concept: a shorter field and keys, no footer sentence under the link
+   (the phone-only note moved out: the page says "Hubungkan ke PC Windows" already). */
+html.td-mobile .connect-section .input-id { padding: 12px 14px; font-size: 22px; }
+html.td-mobile .m-pad-key { height: 46px; font-size: 21px; }
+html.td-mobile .connect-section .pw-field .input-field, html.td-mobile #remote-password { padding-top: 12px; padding-bottom: 12px; }
+html.td-mobile .connect-section .btn-connect { padding: 14px; }
+html.td-mobile[data-mtab="connect"] .m-foot { display: none; }
+html.td-mobile .m-status { font-weight: 500; font-size: 13px; }
+/* Measured to the complete concept (phone, 6 Nov round 3): radius 8 on fields and buttons, keys 48 px / 22 px, title
+   32 px, subtitle and link at the drawn sizes. */
+html.td-mobile .stage-title { font-size: 32px; }
+html.td-mobile .m-lead { font-size: 13px; margin: 8px 0 14px; }
+html.td-mobile .connect-section .input-field, html.td-mobile .connect-section .input-id, html.td-mobile #remote-password, html.td-mobile .pw-field > .input-field { border-radius: 8px; }
+html.td-mobile .pw-eye { border-radius: 0 8px 8px 0; }
+html.td-mobile .connect-section .btn-connect, html.td-mobile #btn-connect { border-radius: 8px; font-size: 15px; }
+html.td-mobile .m-pad-key { height: 48px; font-size: 22px; border-radius: 10px; }
+html.td-mobile #btn-lan-help, html.td-mobile .connect-section .link-btn { font-size: 12.5px; }
+/* Perangkat as drawn: Semua/Favorit, a 34 px search icon (opens to a field on tap) and ⋮ on one row; rows with a
+   76 × 44 picture. Grid / list are in the ⋮ menu. */
+html.td-mobile .recent-head { flex-wrap: nowrap; gap: 8px; }
+html.td-mobile .recent-head-actions { width: auto; flex: 0 0 auto; gap: 8px; }
+html.td-mobile .recent-head .sess-tabs { flex: 1 1 auto; min-width: 0; }
+html.td-mobile .recent-head .sess-tab { height: 34px; font-size: 13px; }
+html.td-mobile .view-toggle { display: none; }
+html.td-mobile .sess-search { flex: 0 0 34px; width: 34px; height: 34px; transition: flex-basis 0.23s var(--ease), width 0.23s var(--ease); }
+html.td-mobile .sess-search input { width: 100%; height: 34px; padding: 0 0 0 33px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg-elevated); font-size: 16px; color: transparent; }
+html.td-mobile .sess-search svg { left: 10px; color: var(--text-primary); z-index: 1; }
+html.td-mobile .sess-search input::placeholder { color: transparent; }
+/* Search opens over half a beat: Semua/Favorit fold away while the field grows, instead of vanishing in one frame. */
+html.td-mobile .recent-head .sess-tabs { max-width: 100%; overflow: hidden; transition: max-width 0.23s var(--ease), opacity 0.115s var(--ease); }
+html.td-mobile .recent-head:has(.sess-search:focus-within) .sess-tabs, html.td-mobile .recent-head:has(.sess-search input:not(:placeholder-shown)) .sess-tabs { max-width: 0; opacity: 0; border-width: 0; pointer-events: none; }
+html.td-mobile .sess-search:focus-within, html.td-mobile .sess-search:has(input:not(:placeholder-shown)) { flex: 1 1 auto; width: auto; }
+html.td-mobile .sess-search:focus-within input, html.td-mobile .sess-search:has(input:not(:placeholder-shown)) input { color: var(--text-primary); background: var(--bg-primary); }
+html.td-mobile .sess-search:focus-within input::placeholder { color: var(--text-muted); }
+html.td-mobile .recent-head-actions:has(.sess-search:focus-within) { flex: 1 1 auto; }
+html.td-mobile #recent-more { width: 34px; height: 34px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg-elevated); color: var(--text-primary); }
+html.td-mobile .view-list .tile-preview { width: 76px; height: 44px; border-radius: 6px; }
+/* Owner, 7 Nov: the head's own bottom line sat 13 px under the Semua/Favorit outline and read as a double line.
+   Lines only between rows, as on the desktop. */
+html.td-mobile[data-mtab="devices"] .hcard-sessions .recent-section, html.td-mobile[data-mtab="devices"] .hcard-sessions .sess-head { border-top: 0; border-bottom: 0; }
+/* Kolom ID kosong (Konsep Lengkap, HP): placeholder 15 px / 500 tepat di tengah; kolomnya memakai ukuran itu selama kosong
+   supaya placeholder tidak duduk di garis dasar huruf 22 px. */
+html.td-mobile .connect-section .input-id:placeholder-shown { font-size: 15px; font-weight: 500; letter-spacing: 0; }
+html.td-mobile .connect-section .input-id::placeholder { font-size: 15px; font-weight: 500; letter-spacing: 0; color: var(--text-muted); }
+/* Reset (Tentang): tombol selebar layar, isinya di tengah seperti tombol lain. */
+html.td-mobile .btn-setting-danger { justify-content: center; }
+html.td-mobile .connect-section .input-id { height: 54px; padding-top: 0; padding-bottom: 0; }
+
+/* Session sheet = Control Center Arah 1 (owner 20 Nov, "HP ikut"): the desktop's cards, with touch-size rows. The
+   sheet is the raised surface, so its cards and numbers sit on the page colour (gallery T23KjQs31TE59RR8Lk5ddJ). */
+html.td-mobile .control-center.cc-panel.cc-a1 { padding: 18px 16px 16px; background: var(--bg-secondary); }
+html.td-mobile .control-center.cc-panel.cc-a1 .cc-stats, html.td-mobile .cc-a1 .cca-card, html.td-mobile .cc-a1 .ccm-map, html.td-mobile .cc-a1 .ccm-opts, html.td-mobile .cc-a1 .ccm-switch { background: var(--bg-primary); }
+html.td-mobile .cc-a1 .ccp-title, html.td-mobile .cca-title, html.td-mobile .cc-a1 .ccm-title { font-size: 24px; }
+html.td-mobile .cca-row { min-height: 52px; padding: 8px 12px; }
+html.td-mobile .cca-tight .cca-row { min-height: 48px; }
+html.td-mobile .cca-tx b { font-size: 14.5px; }
+html.td-mobile .cca-tx small { font-size: 12.5px; }
+html.td-mobile .cca-rad { min-height: 46px; padding: 0 12px; }
+html.td-mobile .cca-rad .cca-tx b { font-size: 14.5px; }
+html.td-mobile .cca-chip { height: 40px; font-size: 13.5px; }
+html.td-mobile .cca-sld { min-height: 48px; }
+html.td-mobile .cca-sld input[type="range"] { height: 28px; }
+html.td-mobile .ccp-back { font-size: 14px; min-height: 36px; }
+
+/* ═══ Opening screen (owner, 7 Nov: "no animation at all when it opens") ═══
+   It continues the system splash: same background, the red mark in the middle. Then, on the 130 bpm grid: the mark
+   settles (230 ms), "TryDesk" rises (460 ms), and three segments fill on the REAL start-up steps (app loaded, server
+   reached, ready), as concept C draws the connection steps. It leaves on half a beat. */
+html.td-mobile .td-boot { position: fixed; inset: 0; z-index: 400; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; background: var(--bg-primary); }
+html.td-mobile .td-boot.leaving { animation: boot-out 0.23s var(--ease) forwards; pointer-events: none; }
+html.td-mobile .td-boot.gone { display: none; }
+html.td-mobile .td-boot-mark { width: 64px; height: 64px; border-radius: 16px; background: var(--accent-fill); display: flex; align-items: center; justify-content: center; }
+html.td-mobile .td-boot-name { margin-top: 18px; font-size: 30px; font-weight: 800; letter-spacing: -0.035em; color: var(--text-primary); overflow: hidden; }
+html.td-mobile .td-boot-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 168px; margin-top: 22px; }
+html.td-mobile .td-boot-steps i { display: block; height: 3px; background: var(--border-strong); position: relative; overflow: hidden; }
+html.td-mobile .td-boot-steps i::after { content: ""; position: absolute; inset: 0; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 0.23s var(--ease); }
+html.td-mobile .td-boot[data-step="1"] .td-boot-steps i:nth-child(1)::after,
+html.td-mobile .td-boot[data-step="2"] .td-boot-steps i:nth-child(-n+2)::after,
+html.td-mobile .td-boot[data-step="3"] .td-boot-steps i::after { transform: scaleX(1); }
+html.td-mobile .td-boot-step { margin-top: 10px; font-size: 12.5px; color: var(--text-muted); }
+@media (prefers-reduced-motion: no-preference) {
+  html.td-mobile .td-boot-mark { animation: boot-mark 0.23s var(--ease) both; }
+  html.td-mobile .td-boot-name { animation: boot-name 0.46s var(--ease) 0.115s both; }
+  html.td-mobile .td-boot-steps, html.td-mobile .td-boot-step { animation: boot-fade 0.23s var(--ease) 0.345s both; }
+  @keyframes boot-mark { from { transform: scale(1.18); } to { transform: none; } }
+  @keyframes boot-name { 0% { opacity: 0; transform: translateY(70%); } 80% { opacity: 1; transform: translateY(-3%); } 100% { transform: none; } }
+  @keyframes boot-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes boot-out { to { opacity: 0; transform: scale(1.02); } }
+  /* Switching the bottom tabs: the page arrives on one beat (td-arrive), the tab's red line slides to it. */
+  html.td-mobile .m-tab::before { transition: transform 0.23s var(--ease), opacity 0.115s; }
+  html.td-mobile .m-tab:active { transform: scale(0.96); }
+}
+
+/* ─── Pengaturan, Arah 2 on the phone (13 Nov 2026) ───
+   Ringkasan first (desc, tiles, quick rows), then "Semua pengaturan": the menu as a list of cards. A page opens on
+   its own: the header names it and its back arrow returns to Ringkasan (app.js showSettingsTab / settingsBack). */
+html.td-mobile #overlay-settings .settings-body { display: flex; flex-direction: column; }
+html.td-mobile #overlay-settings .settings-tab-content { order: 0; gap: 0; }
+html.td-mobile #overlay-settings .settings-tabs { order: 1; display: flex; flex-direction: column; flex-wrap: nowrap; gap: 4px; margin: 0; padding: 0; overflow: visible; border: 0; }
+html.td-mobile #overlay-settings.s-page .settings-tabs { display: none; }
+html.td-mobile #overlay-settings .stabs-title { display: block; margin: 22px 0 8px 2px; font-size: 12px; font-weight: 700; letter-spacing: 0; color: var(--text-secondary); }
+html.td-mobile #overlay-settings .stab[data-tab="tab-home"] { display: none; }
+html.td-mobile #overlay-settings .stab { flex: none; flex-direction: row; align-items: center; gap: 12px; width: 100%; padding: 14px; border: 0; border-radius: 10px; background: var(--bg-secondary); box-shadow: none; color: var(--text-primary); text-align: left; font-size: 15px; }
+html.td-mobile #overlay-settings .stab.m-hide { display: none; }
+html.td-mobile #overlay-settings .stab.active { background: var(--bg-secondary); box-shadow: none; border-radius: 10px; }
+html.td-mobile #overlay-settings .stab .stab-ic { width: 20px; height: 20px; flex: none; color: var(--text-muted); }
+html.td-mobile #overlay-settings .stab.active .stab-ic { color: var(--text-muted); }
+html.td-mobile #overlay-settings .stab-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+html.td-mobile #overlay-settings .stab-tx b { font-size: 15px; font-weight: 600; }
+html.td-mobile #overlay-settings .stab-tx small { font-size: 12.5px; font-weight: 400; color: var(--text-muted); }
+html.td-mobile #overlay-settings .stab .stab-ch { display: block; flex: none; color: var(--text-muted); }
+/* header: "Pengaturan" big on Ringkasan; on a page its name, with the back arrow */
+html.td-mobile #overlay-settings .settings-header h3 { font-size: 26px; font-weight: 800; letter-spacing: -0.035em; }
+html.td-mobile #overlay-settings.s-page .settings-header h3 { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+html.td-mobile #overlay-settings.s-page .settings-back { display: inline-flex; width: 40px; height: 40px; margin-left: -8px; }
+html.td-mobile #overlay-settings .settings-close { display: none; }
+html.td-mobile #overlay-settings .stitle { display: none; }
+html.td-mobile #overlay-settings .sdesc { margin-top: 0; font-size: 13.5px; }
+/* rows */
+html.td-mobile #overlay-settings .srow { min-height: 56px; padding: 13px 14px; }
+html.td-mobile #overlay-settings .srow-tx > b { font-size: 14.5px; }
+html.td-mobile #overlay-settings .srow-tx > small { font-size: 12.5px; }
+html.td-mobile #overlay-settings .srow:has(.set-seg) { flex-direction: column; align-items: stretch; gap: 10px; }
+html.td-mobile #overlay-settings .srow .set-seg { width: 100%; }
+html.td-mobile #overlay-settings .srow .set-seg button { flex: 1; height: 36px; padding: 0 8px; }
+html.td-mobile #overlay-settings .srow .select-input { min-width: 0; max-width: 160px; height: 38px; }
+html.td-mobile #overlay-settings .srow .input-field { height: 40px; }
+html.td-mobile #overlay-settings .srow .btn-apply { height: 40px; }
+html.td-mobile #overlay-settings .srow .volume-row { width: 150px; }
+html.td-mobile #overlay-settings .s-tiles { grid-template-columns: minmax(0, 1fr); margin-top: 18px; }
+html.td-mobile #overlay-settings .s-qnum { display: none; }
+html.td-mobile #overlay-settings .s-qnum-under { display: block; }
+html.td-mobile #overlay-settings .s-qopt { padding: 12px 14px; }
+html.td-mobile #overlay-settings .s-qopt .srow-tx b { font-size: 14.5px; }
+html.td-mobile #overlay-settings .s-qopt .srow-tx small { font-size: 12.5px; }
+html.td-mobile #overlay-settings .sect:first-of-type { margin-top: 20px; }
+html.td-mobile #overlay-settings .settings-header { border-bottom: 0; }
+html.td-mobile #overlay-settings .srow .select-input { max-width: 190px; }
+html.td-mobile #overlay-settings .srow:has(> .srow-tx > small):has(> .select-input) { flex-direction: column; align-items: stretch; gap: 10px; }
+html.td-mobile #overlay-settings .srow:has(> .srow-tx > small) > .select-input { max-width: none; width: 100%; }
+html.td-mobile #overlay-settings .srow .volume-row { width: auto; flex: 0 1 180px; min-width: 0; gap: 10px; }
+html.td-mobile #overlay-settings .srow .volume-row .slider-val { min-width: 40px; }
+html.td-mobile #overlay-settings .adv-toggle { flex-wrap: wrap; row-gap: 2px; }
+html.td-mobile #overlay-settings .adv-toggle small { flex-basis: 100%; padding-left: 24px; }
+
+/* "Cara pakai" Sambung lewat IP, Arah 2 on the phone (owner 15 Nov: "tampilan mobilenya kurang rapi", so reworked
+   concept): app-bar header (close, title), a full-width progress line, the step text then its picture, and
+   "Gagal tersambung?" with the buttons at the thumb. In the problem list the close button becomes a back arrow. */
+html.td-mobile #overlay-lan-help .lh-head { height: 56px; padding: 0 12px 0 6px; gap: 4px; }
+html.td-mobile #overlay-lan-help #btn-lan-help-close, html.td-mobile #overlay-lan-help .lh-back { order: -1; width: 44px; height: 44px; }
+html.td-mobile #overlay-lan-help #btn-lan-help-fix { display: none; }
+html.td-mobile #overlay-lan-help.lh-fixmode #btn-lan-help-close { display: none; }
+html.td-mobile #overlay-lan-help.lh-fixmode .lh-back { display: flex; }
+html.td-mobile #overlay-lan-help .settings-header #lan-help-title { font-size: 16.5px; font-weight: 700; letter-spacing: -0.01em; color: var(--text-primary); }
+html.td-mobile #overlay-lan-help .lh-prog-top { display: flex; margin: 6px 18px 20px; }
+html.td-mobile #overlay-lan-help .lh-prog-top i { flex: 1; width: auto; }
+html.td-mobile #overlay-lan-help.lh-fixmode .lh-prog-top { display: none; }
+html.td-mobile #overlay-lan-help .help-body { padding: 0 18px 16px; }
+html.td-mobile #overlay-lan-help .lh-step { grid-template-columns: minmax(0, 1fr); gap: 0; align-content: start; padding: 0; }
+html.td-mobile #overlay-lan-help .lh-step h4 { margin: 6px 0 8px; font-size: 26px; line-height: 1.12; letter-spacing: -0.03em; }
+html.td-mobile #overlay-lan-help .lh-step p { max-width: none; font-size: 15px; }
+html.td-mobile #overlay-lan-help .lh-who { display: flex; gap: 7px; margin: 12px 0 16px; padding: 0; background: none; color: var(--text-secondary); }
+html.td-mobile #overlay-lan-help .lh-who-pc { display: none; }
+html.td-mobile #overlay-lan-help .lh-who-m { display: inline; }
+html.td-mobile #overlay-lan-help .lh-ill { min-height: 0; padding: 14px; border-radius: 14px; gap: 8px; }
+html.td-mobile #overlay-lan-help .lh-fix h4 { display: none; }
+html.td-mobile #overlay-lan-help .lh-fixg { grid-template-columns: minmax(0, 1fr); margin: 8px 0 12px; }
+html.td-mobile #overlay-lan-help .lh-foot { flex-wrap: wrap; gap: 8px; padding: 4px 18px calc(16px + var(--sab)); border-top: 0; }
+html.td-mobile #overlay-lan-help .lh-foot .lh-prog, html.td-mobile #overlay-lan-help .lh-sp { display: none; }
+html.td-mobile #overlay-lan-help .lh-fixlink-m { display: block; width: 100%; height: 44px; font-size: 14.5px; }
+html.td-mobile #overlay-lan-help.lh-fixmode .lh-fixlink-m { display: none; }
+html.td-mobile #overlay-lan-help .lh-foot .btn-connect, html.td-mobile #overlay-lan-help .lh-foot .btn-secondary { flex: 1; height: 48px; min-height: 48px; font-size: 15px; }
+
+/* Sesi, Arah 3 on the phone (owner pick 15 Nov): Ditolak with the buttons stacked at the thumb, the small notice as a
+   card above the tab bar, the confirmation as a sheet with the main button on top, the message card at the top, and a
+   full-screen chat with a back arrow and the round typing box with its send button beside it. */
+html.td-mobile #fail-view .fail-inner { justify-content: flex-start; padding: 28px 18px 12px; }
+html.td-mobile #fail-view .fail-title { font-size: 34px; }
+html.td-mobile #fail-view .fail-tips li { flex-wrap: wrap; row-gap: 10px; }
+html.td-mobile #fail-view .fail-tips li > div { flex: 1 1 calc(100% - 36px); }
+html.td-mobile #fail-view .fail-tips .ft-act { margin-left: 36px; height: 36px; }   /* under the text, so the text keeps the width */
+html.td-mobile #fail-view .fail-actions { flex-direction: column-reverse; padding: 12px 18px calc(16px + var(--sab)); border-top: 0; }
+html.td-mobile #fail-view .fail-sp { display: none; }
+html.td-mobile:has(.m-tabbar:not(.hidden)) #fail-view .fail-actions { padding-bottom: calc(86px + var(--sab)); }   /* above the tab bar */
+html.td-mobile #fail-view .fail-actions .btn-secondary, html.td-mobile #fail-view .fail-actions .btn-connect { width: 100%; }
+html.td-mobile .toast { top: auto; bottom: calc(80px + var(--sab)); left: 12px; right: 12px; max-width: none; min-height: 0; padding: 10px 6px 10px 16px; border: 1px solid var(--border); border-radius: 14px; font-size: 14px; text-align: left; }
+html.td-mobile:has(.m-tabbar:not(.hidden)) .toast { bottom: calc(92px + var(--sab)); }
+html.td-mobile .app-confirm .app-confirm-box { padding: 22px 20px calc(22px + var(--sab)); }
+html.td-mobile .app-confirm .app-confirm-box h3 { font-size: 24px; line-height: 1.1; }
+html.td-mobile .app-confirm .acf-actions { flex-direction: column-reverse; }
+html.td-mobile .app-confirm .acf-actions > button { flex: none; width: 100%; }
+html.td-mobile #chat-notif-stack { top: calc(8px + var(--sat)); bottom: auto; left: 12px; right: 12px; }
+html.td-mobile .chat-notif.cn3 { width: 100%; max-width: none; }
+html.td-mobile .chat-notif.cn3 .cn-acts > button { flex: 1; height: 44px; }
+html.td-mobile .chat-panel { background: var(--bg-primary); }
+html.td-mobile .chat-panel .chat-head { padding: 4px 18px 12px 8px; }
+html.td-mobile .chat-panel .chat-head .chat-close { position: static; width: 44px; height: 44px; }
+html.td-mobile .chat-panel .chat-head .cx-x { display: none; }
+html.td-mobile .chat-panel .chat-head .cx-back { display: block; }
+html.td-mobile .chat-panel .chat-kick, html.td-mobile .chat-panel .chat-head #chat-with { margin-left: 10px; }
+html.td-mobile .chat-panel .chat-head #chat-with { font-size: 28px; }
+html.td-mobile .chat-panel .chat-messages { padding: 10px 16px; }
+html.td-mobile .chat-panel .chat-msg { max-width: 84%; }
+html.td-mobile .chat-panel .chat-msg.them { background: var(--bg-hover); }
+html.td-mobile .chat-panel .chat-input-row { padding: 10px 12px calc(14px + var(--sab)); border-top: 1px solid var(--border); }
+html.td-mobile .chat-panel .chat-field { gap: 8px; height: auto; padding: 0; border: 0; background: none; box-shadow: none; }
+html.td-mobile .chat-panel .chat-field #chat-input { height: 46px; padding: 0 16px; border: 1px solid var(--border-strong); border-radius: 23px; background: var(--bg-primary); }
+html.td-mobile .chat-panel .chat-send { width: 46px; height: 46px; }
+
+/* Key combinations (Arah B): on a phone a page of its own over the session, Back closes it (as the chat) */
+html.td-mobile .keys-panel { top: 0; width: 100%; border-left: 0; box-shadow: none; background: var(--bg-primary); padding: var(--sat) var(--sar) 0 var(--sal); }
+html.td-mobile .keys-panel .kp-head { padding: 4px 16px 12px 8px; }
+html.td-mobile .keys-panel .kp-close { position: static; width: 44px; height: 44px; }
+html.td-mobile .keys-panel .kp-close .cx-x { display: none; }
+html.td-mobile .keys-panel .kp-close .cx-back { display: block; }
+html.td-mobile .keys-panel .kp-kick, html.td-mobile .keys-panel #keys-with, html.td-mobile .keys-panel .kp-search, html.td-mobile .keys-panel .kp-hold, html.td-mobile .keys-panel .kp-hint { margin-inline-start: 10px; }
+html.td-mobile .keys-panel #keys-with { margin-top: -4px; margin-inline-end: 0; font-size: 26px; }
+html.td-mobile .keys-panel .kp-search { height: 46px; }
+html.td-mobile .keys-panel .kp-search input { font-size: 16px; }
+html.td-mobile .keys-panel .kp-chip { height: 38px; min-width: 52px; font-size: 14px; }
+html.td-mobile .keys-panel .kp-body { padding: 4px 12px 14px; }
+html.td-mobile .keys-panel .kp-tile { padding: 12px; min-height: 64px; }
+html.td-mobile .keys-panel .kp-tile b { font-size: 14px; }
+html.td-mobile .keys-panel .kp-kbds kbd { height: 26px; min-width: 28px; font-size: 12px; }
+html.td-mobile .keys-panel .kp-single { height: 40px; min-width: 48px; font-size: 14px; }
+html.td-mobile .keys-panel .kp-del { width: 36px; height: 36px; top: 2px; inset-inline-end: 2px; }
+html.td-mobile .keys-panel .kp-foot { padding: 10px 12px calc(12px + var(--sab)); }
+html.td-mobile .keys-panel .kp-foot .btn-secondary { height: 46px; min-height: 46px; }
+html.td-mobile .keys-panel .kp-rec { padding-bottom: calc(14px + var(--sab)); }
+html.td-mobile .keys-panel .kp-acts button, html.td-mobile .keys-panel .kp-add button { min-height: 40px; height: 40px; }
+html.td-mobile body:has(#keys-panel:not(.hidden)) #m-toolbar, html.td-mobile body:has(#keys-panel:not(.hidden)) #m-keys { display: none; }
+/* Settings › Suara: the volume slider and its Coba button take a line of their own under "Volume" */
+html.td-mobile #overlay-settings #tab-sound .srow:has(#setting-snd-volume) { flex-direction: column; align-items: stretch; gap: 10px; }
+html.td-mobile #overlay-settings #tab-sound .srow .volume-row { flex: none; width: 100%; }
+html.td-mobile #overlay-settings #tab-sound .volume-row .slider { flex: 1; width: auto; min-width: 0; }
+html.td-mobile #tab-sound .snd-try { height: 40px; min-height: 40px; }
+
+/* ─── In-app update, direction A on the phone (owner 18 Nov 2026; concept "Pembaruan TryDesk", size Ponsel) ───
+   The desktop's strip (#update-bar, same texts) becomes a card above Hubungkan: icon + title, one line of text,
+   the progress line, then its buttons side by side at thumb height ("Yang baru" grey, the next step red). A required
+   update is the same card in red, as on the desktop. Shown on the Hubungkan tab only. */
+html.td-mobile .home > .update-bar { flex-wrap: wrap; align-items: flex-start; gap: 0 10px; padding: 14px 14px 14px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-secondary); }
+html.td-mobile[data-mtab="devices"] .home > .update-bar { display: none; }
+html.td-mobile .home > .update-bar .update-ic { order: 1; display: grid; place-items: center; width: 20px; height: 22px; color: var(--success); }
+html.td-mobile .home > .update-bar[data-kind="info"] .update-ic { color: var(--success); }
+html.td-mobile .home > .update-bar[data-kind="bad"] .update-ic { color: var(--accent-text); }
+html.td-mobile .home > .update-bar .update-copy { order: 1; flex: 1 1 calc(100% - 20px - 40px - 20px); gap: 6px; }
+html.td-mobile .home > .update-bar .update-copy b { font-size: 15px; font-weight: 700; line-height: 22px; }
+html.td-mobile .home > .update-bar .update-copy span { font-size: 13.5px; line-height: 1.45; }
+html.td-mobile .home > .update-bar .update-prog { width: 100%; height: 5px; margin-top: 4px; }
+html.td-mobile .home > .update-bar #update-dismiss { order: 1; flex: none; width: 40px; height: 40px; margin: -9px -8px -9px 0; }
+html.td-mobile .home > .update-bar .update-btn { order: 2; flex: 1 1 0; min-width: 40%; height: 40px; margin-top: 12px; border-radius: 8px; font-size: 14px; }
+html.td-mobile .home > .update-bar #update-notes { background: var(--bg-hover); border-color: transparent; }
+html.td-mobile .home > .update-bar .update-btn.pri { background: var(--accent-fill); border-color: var(--accent-fill); color: #fff; }
+html.td-mobile .home > .update-bar .update-btn.pri:active { background: var(--accent-hover); }
+html.td-mobile .home > .update-bar.required { border-color: var(--accent-fill); background: var(--accent-fill); }
+html.td-mobile .home > .update-bar.required .update-ic, html.td-mobile .home > .update-bar.required #update-dismiss { color: #fff; }
+html.td-mobile .home > .update-bar.required .update-btn, html.td-mobile .home > .update-bar.required #update-notes { background: #fff; border-color: #fff; color: #a51c17; }
+html.td-mobile .home > .update-bar.required .update-prog { background: rgba(255,255,255,.3); }
+html.td-mobile .home > .update-bar.required .update-prog i { background: #fff; }
+/* ═══ Kelola banyak perangkat on the phone (Android concept D9bd, owner 21 Nov) ══════════════════════════════════
+   The same page as on a PC (app.js "Kelola banyak perangkat"), drawn like the concept's Android frames: a 56 px top
+   bar (‹, title, pencil, Pilih), the groups sliding sideways under it, every PC on one scrolling page two across,
+   name and dot under each picture (no ID), the actions across the bottom while picking, windows as bottom sheets. */
+html.td-mobile.manage-open .km { display: flex; flex-direction: column; position: fixed; inset: 0; z-index: 45; padding: var(--sat) var(--sar) 0 var(--sal); background: var(--bg-primary); }
+html.td-mobile .m-tabbar.m-km-hide { display: none !important; }
+html.td-mobile .km .km-head { height: 56px; min-height: 56px; gap: 10px; padding: 0 12px 0 6px; border-bottom: 1px solid var(--border); }
+html.td-mobile .km #km-back { display: inline-flex; width: 40px; height: 40px; flex: none; color: var(--text-primary); }
+html.td-mobile .km .km-head .dev-title { flex: 1; min-width: 0; margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.td-mobile .km .km-head .dev-title em { display: none; }
+html.td-mobile .km .km-hact { display: flex; align-items: center; gap: 2px; flex: none; }
+html.td-mobile .km .km-hact .km-ib { width: 40px; height: 40px; }
+html.td-mobile .km .km-hact .km-ghost, html.td-mobile .km .km-hsel .km-ghost { height: 40px; padding: 0 10px; font-size: 14px; }
+html.td-mobile .km .km-head-sel #km-back, html.td-mobile .km .km-head-sel .dev-title { display: none; }
+html.td-mobile .km .km-hsel { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; padding-left: 4px; }
+html.td-mobile .km .km-hsel .km-ib { width: 40px; height: 40px; }
+html.td-mobile .km .km-hsel .km-cnt { flex: 1; font-size: 16px; font-weight: 700; }
+html.td-mobile .km .km-row { margin: 14px 16px 0; }
+html.td-mobile .km .km-row .km-segw { flex: 1 1 auto; }
+html.td-mobile .km .km-segw .km-gt { min-height: 34px; }
+html.td-mobile .km .km-bn { margin: 12px 16px 0; flex-wrap: wrap; align-items: flex-start; padding: 10px 6px 10px 12px; }
+html.td-mobile .km .km-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; align-content: start; gap: 14px 12px; padding: 12px 16px calc(12px + var(--sab)); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; scrollbar-width: none; }
+html.td-mobile .km .km-grid::-webkit-scrollbar { display: none; }
+html.td-mobile .km .km-grid:has(> .km-empty) { grid-template-columns: minmax(0, 1fr); }
+html.td-mobile .km .km-meta .km-id { display: none; }
+html.td-mobile .km .km-nm { font-size: 14px; }
+html.td-mobile .km .km-tl { font-size: 10.5px; }
+html.td-mobile .km .km-foot { margin: 0; padding: 0 var(--sar) var(--sab) var(--sal); height: auto; min-height: 0; }
+html.td-mobile .km .km-foot.km-foot-none { display: none; }
+html.td-mobile .km .km-foot:not(.km-pact):not(.km-foot-none) { min-height: 52px; padding-left: 16px; padding-right: 16px; white-space: normal; }
+html.td-mobile .km .km-foot.km-pact { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; height: calc(64px + var(--sab)); background: var(--bg-secondary); box-shadow: 0 -10px 24px rgba(0, 0, 0, 0.18); }
+html.td-mobile .km .km-pact > button { height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 0; border: 0; border-radius: 0; background: none; color: var(--text-primary); font-size: 11.5px; font-weight: 600; }
+html.td-mobile .km .km-pact > button.km-red { color: var(--accent-text); }
+html.td-mobile .km .km-pact > button:disabled { opacity: 0.4; }
+html.td-mobile .km .km-pact > button:active:not(:disabled) { background: var(--bg-hover); }
+/* windows (password, groups, move, new group) as bottom sheets */
+html.td-mobile .km-scrim { place-items: end stretch; padding: 0; }
+html.td-mobile .km-dlg { width: 100%; max-width: none; max-height: 86dvh; border: 0; border-top: 1px solid var(--border); border-radius: 16px 16px 0 0; padding: 10px 16px calc(18px + var(--sab)); animation: m-km-sheet .23s cubic-bezier(.2, .9, .3, 1); }
+html.td-mobile .km-dlg::before { content: ""; display: block; width: 36px; height: 4px; margin: 0 auto 12px; border-radius: 2px; background: var(--border-strong); }
+html.td-mobile .km-dlg h3 { font-size: 18px; }
+html.td-mobile .km-dlg .km-acts { gap: 8px; margin-top: 14px; }
+html.td-mobile .km-dlg .km-acts > button { flex: 1; height: 46px; justify-content: center; font-size: 14px; }
+html.td-mobile .km-dlg .km-acts > .km-left { flex: none; margin-right: 0; }
+html.td-mobile .km-dlg input { height: 46px; font-size: 16px; }
+@keyframes m-km-sheet { from { transform: translateY(40px); opacity: 0; } }
+/* the card on Beranda (concept: under "Satu jaringan? Sambung lewat IP") */
+html.td-mobile .m-manage { width: 100%; display: flex; align-items: center; gap: 12px; margin-top: 18px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-secondary); color: var(--text-primary); font-family: inherit; font-size: 14.5px; font-weight: 700; text-align: left; cursor: pointer; }
+html.td-mobile .m-manage:active { background: var(--bg-hover); }
+html.td-mobile .m-manage > svg:first-child { flex: none; color: var(--text-secondary); }
+html.td-mobile .m-manage-tx { flex: 1; min-width: 0; }
+html.td-mobile .m-manage-tx b { display: block; font-weight: 700; }
+html.td-mobile .m-manage-tx small { display: block; margin-top: 2px; font-size: 12.5px; font-weight: 500; color: var(--text-secondary); line-height: 1.35; }
+html.td-mobile .m-manage-ar { flex: none; color: var(--text-muted); }
+.m-manage { display: none; }
+html.td-mobile .m-manage { display: flex; }
